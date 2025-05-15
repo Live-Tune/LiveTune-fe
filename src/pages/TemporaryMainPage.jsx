@@ -1,11 +1,11 @@
 import styled from "styled-components";
-import logo from "../assets/LiveTuneLogo.png";
 import LoginPanel from "../components/dev1/LoginPanel";
+import { LiveTuneLogoBig } from "../styles/GlobalStyle";
 
 function TemporaryMainPage() {
   return (
     <PanelWrapper>
-      <LiveTuneLogo src={logo} alt="LiveTune Logo" />
+      <LiveTuneLogoBig />
       <LiveTuneTitle>Live Tune</LiveTuneTitle>
       <LoginPanel />
     </PanelWrapper>
@@ -24,11 +24,6 @@ const LiveTuneTitle = styled.div`
   font-size: 75px;
   font-weight: bold;
   color: white;
-`;
-
-const LiveTuneLogo = styled.img`
-  width: 150px;
-  filter: hue-rotate(90deg) saturate(200%) brightness(30%);
 `;
 
 export default TemporaryMainPage;
