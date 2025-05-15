@@ -4,7 +4,7 @@ import LoginPanel from "../components/dev1/LoginPanel";
 
 function TemporaryMainPage() {
   return (
-    <PanelWrapper className="asdf">
+    <PanelWrapper>
       <LiveTuneLogo src={logo} alt="LiveTune Logo" />
       <LiveTuneTitle>Live Tune</LiveTuneTitle>
       <LoginPanel />
@@ -13,7 +13,7 @@ function TemporaryMainPage() {
 }
 
 const PanelWrapper = styled.div`
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -15,8 +15,7 @@ const gradientAnimation = keyframes`
 
 export const BackgroundGradient = styled.div`
   width: 100%;
-  height: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   background: linear-gradient(90deg, ${gradientColor1}, ${gradientColor2});
   background-size: 200% 200%;
   animation: ${gradientAnimation} 15s ease-in-out infinite;

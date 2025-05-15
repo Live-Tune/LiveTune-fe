@@ -1,4 +1,3 @@
-import "./App.css";
 import Router from "./shared/Router";
 import { BackgroundGradient } from "./styles/BackgroundGradient";
 
