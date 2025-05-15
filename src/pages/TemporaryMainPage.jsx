@@ -18,7 +18,7 @@ const PanelWrapper = styled.div`
 `;
 
 const LiveTuneLogo = styled.img`
-  filter: hue-rotate(140deg) saturate(200%) brightness(30%);
+  filter: hue-rotate(90deg) saturate(200%) brightness(30%);
 `;
 
 export default TemporaryMainPage;
