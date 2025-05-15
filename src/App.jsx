@@ -1,19 +1,14 @@
 import styled from "styled-components";
 import "./App.css";
+import logo from "./assets/LiveTuneLogo.png";
+import Router from "./shared/Router";
 
 function App() {
   return (
     <>
-      <YourCustomButton>Button</YourCustomButton>
+      <Router />
     </>
   );
 }
-
-const YourCustomButton = styled.button`
-  width: 200px;
-  height: 200px;
-  background-color: yellow;
-  color: green;
-`;
 
 export default App;

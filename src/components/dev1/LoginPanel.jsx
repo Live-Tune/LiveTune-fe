@@ -1,5 +1,5 @@
 function LoginPanel() {
-  return <></>;
+  return <>LoginPanel</>;
 }
 
 export default LoginPanel;
