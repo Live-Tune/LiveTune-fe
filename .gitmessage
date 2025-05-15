@@ -1,0 +1,26 @@
+################
+# Write the title in the format of <type>: <subject> below this blank line
+# The title should be within 50 characters
+# clearly describe "what" has been changed / do not end with a period
+# Start upper case, don't end with a period
+# Example) feat: Add login functionality
+
+# Do not delete the blank line immediately below (for separation of title and body)
+
+################
+# Write the body (specific details) on the line below
+# When writing multi-line messages, separate them with "-" (each line within 72 characters)
+
+################
+# Write the footer below (add issue numbers related to this commit, etc.)
+# Example) Close #7
+
+################
+# feat: Add a new feature
+# fix: Fix a bug
+# docs: Modify documentation
+# test: Add test code
+# refact: Refactor code
+# style: Changes that do not affect the meaning of the code
+# chore: Changes to the build process or package manager
+################
