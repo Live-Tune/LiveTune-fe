@@ -1,12 +1,14 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { gradientColor1, gradientColor2, LiveTuneLogoBig } from "../../styles/GlobalStyle";
+import {
+  gradientColor1,
+  gradientColor2,
+  LiveTuneLogoBig,
+} from "../../styles/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 
 const LoginPanelWrapper = styled.div`
-  height: 100vh;
-  width: 100vw;
-  background: linear-gradient(to right, ${gradientColor1}, ${gradientColor2});
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;

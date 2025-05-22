@@ -8,17 +8,21 @@ import { useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 
-
-
-
-
 function MainPanel() {
   const username = localStorage.getItem("livetune-username") || "Guest";
   const [showDropdown, setShowDropdown] = useState(false);
   const genreTags = [
-    "#kpop", "#rock", "#classical", "#jazz",
-    "#lofi", "#r&b", "#pop", "#metal",
-    "#disco", "#60s", "#ballads"
+    "#kpop",
+    "#rock",
+    "#classical",
+    "#jazz",
+    "#lofi",
+    "#r&b",
+    "#pop",
+    "#metal",
+    "#disco",
+    "#60s",
+    "#ballads",
   ];
   const navigate = useNavigate();
 
@@ -33,34 +37,32 @@ function MainPanel() {
         <LeftBox>
           <ActionButton>Join private room</ActionButton>
           <ActionButton onClick={() => navigate("/RoomCreatePanel")}>
-          Create a room
-        </ActionButton>
-
+            Create a room
+          </ActionButton>
         </LeftBox>
 
         <RightBox>
-              <SearchWrapper>
-        <SearchHeader>
-          <SearchIcon><FaSearch /></SearchIcon>
-          <SearchInput placeholder="Search by name" />
-          <Tag>#kpop</Tag>
-          <Tag>#rock</Tag>
-          <DropdownIcon onClick={() => setShowDropdown(prev => !prev)}>
-            <MdArrowDropDown />
-          </DropdownIcon>
-        </SearchHeader>
+          <SearchWrapper>
+            <SearchHeader>
+              <SearchIcon>
+                <FaSearch />
+              </SearchIcon>
+              <SearchInput placeholder="Search by name" />
+              <Tag>#kpop</Tag>
+              <Tag>#rock</Tag>
+              <DropdownIcon onClick={() => setShowDropdown((prev) => !prev)}>
+                <MdArrowDropDown />
+              </DropdownIcon>
+            </SearchHeader>
 
-        {showDropdown && (
-          <DropdownMenu>
-            {genreTags.map((tag, idx) => (
-              <Tag key={idx}>{tag}</Tag>
-            ))}
-          </DropdownMenu>
-        )}
-      </SearchWrapper>
-
-          
-
+            {showDropdown && (
+              <DropdownMenu>
+                {genreTags.map((tag, idx) => (
+                  <Tag key={idx}>{tag}</Tag>
+                ))}
+              </DropdownMenu>
+            )}
+          </SearchWrapper>
 
           <RoomList>
             <RoomItem>
@@ -110,15 +112,12 @@ const DropdownIcon = styled.div`
   cursor: pointer;
 `;
 
-
 const SearchWrapper = styled.div`
   display: flex;
   flex-direction: column;
 `;
 
 const Wrapper = styled.div`
-  background: linear-gradient(to right, #0097b1, #7ed957);
-  min-height: 100vh;
   padding: 40px 20px 60px;
 `;
 
@@ -126,7 +125,6 @@ const Header = styled.div`
   text-align: center;
   margin-bottom: 30px;
 `;
-
 
 const Title = styled.h1`
   color: white;
@@ -224,7 +222,6 @@ const DropdownMenu = styled.div`
   flex-wrap: wrap;
   gap: 10px;
 `;
-
 
 const RoomList = styled.div`
   padding: 30px;
