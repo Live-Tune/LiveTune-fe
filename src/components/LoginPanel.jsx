@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { LiveTuneLogoBig } from "../../styles/GlobalStyle";
+import { LiveTuneLogoBig } from "../styles/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 
 function LoginPanel() {

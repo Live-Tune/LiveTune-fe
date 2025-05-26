@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import { LiveTuneLogoBig } from "../styles/GlobalStyle";
 import { useEffect, useState } from "react";
-import RoomControlPanel from "../components/dev1/RoomControlPanel";
-import RoomSearchPanel from "../components/dev1/RoomSearchPanel";
+import RoomControlPanel from "../components/RoomControlPanel";
+import RoomSearchPanel from "../components/RoomSearchPanel";
 
 function MainPanel() {
   const [username, setUsername] = useState("Guest");
