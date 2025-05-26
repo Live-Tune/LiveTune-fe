@@ -1,11 +1,13 @@
 import styled from "styled-components";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function RoomCreatePanel() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [userlimit, setUserLimit] = useState("");
+  const navigate = useNavigate();
 
   const handleSetName = (e) => {
     setName(e.target.value);
@@ -20,7 +22,7 @@ function RoomCreatePanel() {
   };
 
   const handleGoBack = () => {
-    console.log("User want to go back");
+    navigate("/main");
   };
 
   const handleCreate = () => {
