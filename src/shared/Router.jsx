@@ -10,7 +10,7 @@ function Router() {
       <Routes>
         <Route path="/" element={<LoginPage />} />{" "}
         <Route path="/RoomCreatePanel" element={<RoomCreatePage />} />
-        <Route path="/RoomPanel" element={<RoomPanel />} />
+        <Route path="/RoomPanel/:id" element={<RoomPanel />} />
         <Route path="/main" element={<MainPanel />} />
       </Routes>
     </BrowserRouter>

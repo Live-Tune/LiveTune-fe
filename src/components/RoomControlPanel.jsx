@@ -6,7 +6,8 @@ function RoomControlPanel() {
   const navigate = useNavigate();
   return (
     <PanelBox>
-      <ActionButton>Join private room</ActionButton>
+      {/* Not implemented in current stage */}
+      {/* <ActionButton>Join private room</ActionButton> */}
       <ActionButton onClick={() => navigate("/RoomCreatePanel")}>
         Create a room
       </ActionButton>
@@ -38,4 +39,3 @@ const ActionButton = styled.button`
   margin: 15px 0;
   cursor: pointer;
 `;
-

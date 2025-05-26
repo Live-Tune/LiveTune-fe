@@ -1,19 +1,38 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
+import { fetchRoomInfo } from "../apis/backendApis";
+import { useNavigate, useParams } from "react-router-dom";
 
 function RoomPanel() {
+  const id = useParams().id;
   const playerRef = useRef(null);
+  const [roomInfo, setRoomInfo] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const update = async () => {
+      const info = await fetchRoomInfo(id);
+      console.log(info);
+      setRoomInfo(info);
+    };
+    update();
+  }, []);
 
   return (
     <PageWrapper>
       <TopBar>
         <TitleDiv>
-          <ArrowBackIcon />
-          Room title
+          <ArrowBackIcon
+            onClick={() => {
+              navigate("/main");
+            }}
+          />
+          {roomInfo?.room_name}
         </TitleDiv>
+        {roomInfo?.description}
         <TitleDiv>
           LiveTune Player <LiveTuneLogoSmall />
         </TitleDiv>

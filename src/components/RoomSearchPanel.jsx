@@ -1,29 +1,51 @@
-
 // ✅ RoomSearchPanel.jsx
 import styled from "styled-components";
 import { FaSearch } from "react-icons/fa";
 import { MdArrowDropDown } from "react-icons/md";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchAvailableRooms } from "../apis/backendApis";
+import { useNavigate } from "react-router-dom";
 
 function RoomSearchPanel() {
   const [showDropdown, setShowDropdown] = useState(false);
   const genreTags = [
-    "#kpop", "#rock", "#classical", "#jazz",
-    "#lofi", "#r&b", "#pop", "#metal",
-    "#disco", "#60s", "#ballads"
+    "#kpop",
+    "#rock",
+    "#classical",
+    "#jazz",
+    "#lofi",
+    "#r&b",
+    "#pop",
+    "#metal",
+    "#disco",
+    "#60s",
+    "#ballads",
   ];
+
+  const navigate = useNavigate();
+  const [roomList, setRoomList] = useState([]);
+
+  useEffect(() => {
+    const update = async () => {
+      setRoomList(await fetchAvailableRooms());
+    };
+    update();
+  }, []);
 
   return (
     <PanelBox>
       <SearchWrapper>
         <SearchHeader>
-          <SearchIcon><FaSearch /></SearchIcon>
+          <SearchIcon>
+            <FaSearch />
+          </SearchIcon>
           <SearchInput placeholder="Search by name" />
-          <Tag>#kpop</Tag>
+          {/* Tag not implemented in current stage */}
+          {/* <Tag>#kpop</Tag>
           <Tag>#rock</Tag>
           <DropdownIcon onClick={() => setShowDropdown((prev) => !prev)}>
             <MdArrowDropDown />
-          </DropdownIcon>
+          </DropdownIcon> */}
         </SearchHeader>
 
         {showDropdown && (
@@ -36,38 +58,28 @@ function RoomSearchPanel() {
       </SearchWrapper>
 
       <RoomList>
-        <RoomItem>
-          <RoomText>
-            <RoomName>Block B Lovers</RoomName>
-            <RoomDesc>Join if you like Block B!</RoomDesc>
-          </RoomText>
-          <RoomJoin>
-            <JoinButton>Join room</JoinButton>
-            <Listeners>Currently 5 listeners</Listeners>
-          </RoomJoin>
-        </RoomItem>
-
-        <RoomItem>
-          <RoomText>
-            <RoomName>Ballroom</RoomName>
-            <RoomDesc>For fans of classic music</RoomDesc>
-          </RoomText>
-          <RoomJoin>
-            <JoinButton>Join room</JoinButton>
-            <Listeners>Currently 2 listeners</Listeners>
-          </RoomJoin>
-        </RoomItem>
-
-        <RoomItem>
-          <RoomText>
-            <RoomName>Rock out</RoomName>
-            <RoomDesc>ROCK AND ROOLL!!!!</RoomDesc>
-          </RoomText>
-          <RoomJoin>
-            <JoinButton>Join room</JoinButton>
-            <Listeners>Currently 1 listener</Listeners>
-          </RoomJoin>
-        </RoomItem>
+        {roomList.map((room) => {
+          return (
+            <RoomItem key={room.ID}>
+              <RoomText>
+                <RoomName>{room.name}</RoomName>
+                <RoomDesc>{room.description}</RoomDesc>
+              </RoomText>
+              <RoomJoin>
+                <JoinButton
+                  onClick={() => {
+                    navigate(`/RoomPanel/${room.ID}`);
+                  }}
+                >
+                  Join room
+                </JoinButton>
+                <Listeners>
+                  Currently {room.currentUsers.length} listeners
+                </Listeners>
+              </RoomJoin>
+            </RoomItem>
+          );
+        })}
       </RoomList>
     </PanelBox>
   );
