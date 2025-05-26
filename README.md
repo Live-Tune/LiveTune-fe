@@ -1,8 +1,21 @@
-# MusicStreamingService Front-end
+# LiveTune Front-end
 
 ## About
 
-MusicStreamingService front-end part repository
+LiveTune front-end part repository
+
+## How To Run
+Requirements: 
+node js 
+```
+git clone git@github.com:Live-Tune/LiveTune-fe.git
+cd LiveTune-fe
+npm install
+npm run dev
+
+```
+Then you will see a link in the terminal that you can access in a web browser. (e.g. localhost:8080)
+
 
 ## Contributing guidlines
 
