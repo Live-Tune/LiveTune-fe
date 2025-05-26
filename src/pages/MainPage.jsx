@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import RoomControlPanel from "../components/RoomControlPanel";
 import RoomSearchPanel from "../components/RoomSearchPanel";
 
-function MainPanel() {
+function MainPage() {
   const [username, setUsername] = useState("Guest");
 
   useEffect(() => {
@@ -28,7 +28,7 @@ function MainPanel() {
   );
 }
 
-export default MainPanel;
+export default MainPage;
 
 const Wrapper = styled.div`
   padding: 40px 20px 60px;
