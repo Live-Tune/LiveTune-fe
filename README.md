@@ -5,8 +5,7 @@
 LiveTune front-end part repository
 
 ## How To Run
-Requirements: 
-node js 
+You will need (Node.js)[https://nodejs.org/en/download] to run the following commands.
 ```
 git clone git@github.com:Live-Tune/LiveTune-fe.git
 cd LiveTune-fe
