@@ -2,7 +2,7 @@ import { useRef } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { LiveTuneLogoSmall } from "../../styles/GlobalStyle";
+import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
 
 function RoomPanel() {
   const playerRef = useRef(null);
