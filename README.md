@@ -31,6 +31,21 @@ cd LiveTune-fe
 git config commit.template .gitmessage
 ```
 
+## Folder Structure 
+```
+LIVETUNE/
+└── LiveTune-fe/
+    ├── node_modules/
+    ├── src/             #Source code folder — contains all app logic.
+    │   ├── assets/      #Stores static assets like images, fonts, etc.
+    │   ├── components/  #Holds reusable UI components.
+    │   │   ├── dev1/    #developer 1
+    │   │   └── dev2/    #developer 2
+    │   ├── pages/       #Contains page-level components
+    │   ├── shared/      #Meant for shared utilities, hooks, or smaller components.
+    │   └── styles/      #Global or modular CSS/SCSS files used for styling.
+
+```
 ### Committing
 
 When committing, please use `git commit` without the `-m` option and adhere to the template format.
