@@ -37,13 +37,11 @@ LIVETUNE/
 └── LiveTune-fe/
     ├── node_modules/
     ├── src/             #Source code folder — contains all app logic.
-    │   ├── assets/      #Stores static assets like images, fonts, etc.
-    │   ├── components/  #Holds reusable UI components.
-    │   │   ├── dev1/    #developer 1
-    │   │   └── dev2/    #developer 2
-    │   ├── pages/       #Contains page-level components
-    │   ├── shared/      #Meant for shared utilities, hooks, or smaller components.
-    │   └── styles/      #Global or modular CSS/SCSS files used for styling.
+    │   ├── assets/      #Stores static assets like image logo.
+    │   ├── components/  #Reusable UI blocks like panels and controls.
+    │   ├── pages/       #Full pages or views (e.g., Login, Main, Room creation).
+    │   ├── shared/      #Router
+    │   └── styles/      #Global or modular CSS files used for styling.
 
 ```
 ### Committing
