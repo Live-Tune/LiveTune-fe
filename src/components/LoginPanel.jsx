@@ -18,44 +18,22 @@ function LoginPanel() {
   };
 
   return (
-    <LoginPanelWrapper>
-      <LiveTuneLogoBig />
-      <Title>Live Tune</Title>
-
-      <Card
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
-      >
-        <Label>Username</Label>
-        <Input
-          type="text"
-          placeholder="Enter your username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <Button onClick={handleLogin}>Next</Button>
-      </Card>
-    </LoginPanelWrapper>
+    <Card
+      onSubmit={(e) => {
+        e.preventDefault();
+      }}
+    >
+      <Label>Username</Label>
+      <Input
+        type="text"
+        placeholder="Enter your username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      <Button onClick={handleLogin}>Next</Button>
+    </Card>
   );
 }
-
-const LoginPanelWrapper = styled.div`
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-`;
-
-const Title = styled.div`
-  color: white;
-  font-size: 36px;
-  font-weight: bold;
-  margin-top: 20px;
-  margin-bottom: 40px;
-`;
 
 const Card = styled.form`
   background-color: #122f23;
