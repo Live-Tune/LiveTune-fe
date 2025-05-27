@@ -6,7 +6,7 @@ import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
 import { fetchRoomInfo } from "../apis/backendApis";
 import { useNavigate, useParams } from "react-router-dom";
 
-function RoomPanel() {
+function RoomPage() {
   const id = useParams().id;
   const playerRef = useRef(null);
   const [roomInfo, setRoomInfo] = useState(null);
@@ -141,4 +141,4 @@ const UserPanel = styled.div`
   color: white;
 `;
 
-export default RoomPanel;
+export default RoomPage;

@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import RoomPanel from "../components/RoomPanel";
+import RoomPage from "../pages/RoomPage";
 import LoginPage from "../pages/LoginPage";
 import MainPanel from "../pages/MainPage";
 import RoomCreatePage from "../pages/RoomCreatePage";
@@ -10,7 +10,7 @@ function Router() {
       <Routes>
         <Route path="/" element={<LoginPage />} />{" "}
         <Route path="/RoomCreatePanel" element={<RoomCreatePage />} />
-        <Route path="/RoomPanel/:id" element={<RoomPanel />} />
+        <Route path="/RoomPage/:id" element={<RoomPage />} />
         <Route path="/main" element={<MainPanel />} />
       </Routes>
     </BrowserRouter>

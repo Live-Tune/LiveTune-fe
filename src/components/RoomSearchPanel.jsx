@@ -68,7 +68,7 @@ function RoomSearchPanel() {
               <RoomJoin>
                 <JoinButton
                   onClick={() => {
-                    navigate(`/RoomPanel/${room.ID}`);
+                    navigate(`/RoomPage/${room.ID}`);
                   }}
                 >
                   Join room
