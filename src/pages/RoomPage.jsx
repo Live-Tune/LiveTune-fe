@@ -30,7 +30,7 @@ function RoomPage() {
 
     const socket = io(backendEndpoint);
 
-    socket.emit("join_room", { room_id: id, userName });
+    socket.emit("join_room", { room_id: id, user: userName });
 
     socket.on("connect", () => {
       console.log("Connected");
