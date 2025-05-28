@@ -67,16 +67,17 @@ function RoomSearchPanel() {
                 <RoomDesc>{room.description}</RoomDesc>
               </RoomText>
               <RoomJoin>
-                <JoinButton
-                  onClick={() => {
-                    navigate(`/RoomPage/${room.id}`);
-                  }}
-                >
-                  Join room
-                </JoinButton>
+                {room.currentUsers.length != room.max_user && (
+                  <JoinButton
+                    onClick={() => {
+                      navigate(`/RoomPage/${room.id}`);
+                    }}
+                  >
+                    Join room
+                  </JoinButton>
+                )}
                 <Listeners>
-                  Currently {room.currentUsers?.length}/{room.max_user}{" "}
-                  listeners
+                  Currently {room.currentUsers.length}/{room.max_user} listeners
                 </Listeners>
               </RoomJoin>
             </RoomItem>
