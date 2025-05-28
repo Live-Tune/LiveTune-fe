@@ -27,7 +27,8 @@ function RoomSearchPanel() {
 
   useEffect(() => {
     const update = async () => {
-      setRoomList(await fetchAvailableRooms());
+      const fetchedRoomList = await fetchAvailableRooms();
+      setRoomList(fetchedRoomList);
     };
     update();
   }, []);
@@ -58,9 +59,9 @@ function RoomSearchPanel() {
       </SearchWrapper>
 
       <RoomList>
-        {roomList.map((room) => {
+        {roomList?.map((room) => {
           return (
-            <RoomItem key={room.ID}>
+            <RoomItem key={room.id}>
               <RoomText>
                 <RoomName>{room.name}</RoomName>
                 <RoomDesc>{room.description}</RoomDesc>
@@ -68,13 +69,14 @@ function RoomSearchPanel() {
               <RoomJoin>
                 <JoinButton
                   onClick={() => {
-                    navigate(`/RoomPage/${room.ID}`);
+                    navigate(`/RoomPage/${room.id}`);
                   }}
                 >
                   Join room
                 </JoinButton>
                 <Listeners>
-                  Currently {room.currentUsers.length} listeners
+                  Currently {room.currentUsers?.length}/{room.max_user}{" "}
+                  listeners
                 </Listeners>
               </RoomJoin>
             </RoomItem>

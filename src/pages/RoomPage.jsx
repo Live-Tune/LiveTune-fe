@@ -5,24 +5,82 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
 import { fetchRoomInfo } from "../apis/backendApis";
 import { useNavigate, useParams } from "react-router-dom";
+import { backendEndpoint } from "../apis/backendApis";
+import { io } from "socket.io-client";
 
 function RoomPage() {
   const id = useParams().id;
+  const user = localStorage.getItem("livetune-username");
   const playerRef = useRef(null);
   const [roomInfo, setRoomInfo] = useState(null);
   const navigate = useNavigate();
+  const socketRef = useRef(null);
 
   useEffect(() => {
     const update = async () => {
-      const info = await fetchRoomInfo(id);
-      console.log(info);
-      setRoomInfo(info);
+      setRoomInfo(await fetchRoomInfo(id));
     };
     update();
+
+    const socket = io(backendEndpoint);
+
+    socket.emit("join_room", { room_id: id, user });
+
+    socket.on("connect", () => {
+      console.log("Connected");
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected");
+    });
+
+    socket.on("receive_message", (data) => {
+      console.log(data);
+    });
+
+    socket.on("broadcast_play", () => {
+      console.log("Brdcst play");
+      playerRef.current.playVideo();
+    });
+
+    socket.on("broadcast_stop", () => {
+      console.log("Brdcst stop");
+      playerRef.current.stopVideo();
+    });
+
+    socket.on("user_joined", (data) => {
+      console.log(data);
+    });
+
+    socket.on("user_joined", (data) => {
+      console.log(`${data.user} joined the room`);
+    });
+
+    socketRef.current = socket;
+
+    return () => {
+      socket.emit("leave_room", { room_id: id, user });
+      socket.disconnect();
+    };
   }, []);
+
+  const sendMessage = () => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "msg",
+      message: "hello",
+    });
+  };
 
   return (
     <PageWrapper>
+      <button
+        onClick={() => {
+          sendMessage();
+        }}
+      >
+        AAA
+      </button>
       <TopBar>
         <TitleDiv>
           <ArrowBackIcon
@@ -30,7 +88,7 @@ function RoomPage() {
               navigate("/main");
             }}
           />
-          {roomInfo?.room_name}
+          {roomInfo?.name}
         </TitleDiv>
         {roomInfo?.description}
         <TitleDiv>
@@ -70,6 +128,10 @@ function RoomPage() {
           </button>
           <button
             onClick={() => {
+              socketRef.current.emit("send_message", {
+                room_id: id,
+                message_type: "play",
+              });
               playerRef.current.playVideo();
             }}
           >
@@ -77,6 +139,10 @@ function RoomPage() {
           </button>
           <button
             onClick={() => {
+              socketRef.current.emit("send_message", {
+                room_id: id,
+                message_type: "stop",
+              });
               playerRef.current.pauseVideo();
             }}
           >
@@ -119,6 +185,7 @@ const TopBar = styled.div`
   align-items: center;
   padding: 0px 20px 0px 20px;
 `;
+
 const PanelWrapper = styled.div`
   width: 100vw;
   flex: 9;

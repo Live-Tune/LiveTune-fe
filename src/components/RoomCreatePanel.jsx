@@ -7,7 +7,7 @@ import { fetchCreateNewRoom } from "../apis/backendApis";
 function RoomCreatePanel() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [userlimit, setUserLimit] = useState("");
+  const [userlimit, setUserLimit] = useState(2);
   const navigate = useNavigate();
 
   const handleSetName = (e) => {
@@ -27,18 +27,17 @@ function RoomCreatePanel() {
   };
 
   const handleCreate = async () => {
-    // const host = localStorage.getItem("livetune-username");
-    // const result = await fetchCreateNewRoom(
-    //   name,
-    //   description,
-    //   userlimit,
-    //   host,
-    //   false
-    // );
-    // console.log(result);
-    // if (result) {
-    //   navigate(`/RoomPanel/${1}`);
-    // }
+    const host = localStorage.getItem("livetune-username");
+    const result = await fetchCreateNewRoom(
+      name,
+      description,
+      userlimit,
+      host,
+      false
+    );
+    if (result) {
+      navigate(`/RoomPage/${result}`);
+    }
   };
 
   return (
