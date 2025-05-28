@@ -16,6 +16,11 @@ function RoomPage() {
   const navigate = useNavigate();
   const socketRef = useRef(null);
 
+  const pingTimeRef = useRef(0);
+  const pingDelayRef = useRef(0);
+  const pingSumRef = useRef(0);
+  const pingCountRef = useRef(0);
+
   useEffect(() => {
     const update = async () => {
       setRoomInfo(await fetchRoomInfo(id));
@@ -43,9 +48,23 @@ function RoomPage() {
       playerRef.current.playVideo();
     });
 
-    socket.on("broadcast_stop", () => {
-      console.log("Brdcst stop");
-      playerRef.current.stopVideo();
+    socket.on("broadcast_pause", () => {
+      console.log("Brdcst pause");
+      playerRef.current.pauseVideo();
+    });
+
+    socket.on("pong", () => {
+      pingDelayRef.current = Date.now() - pingTimeRef.current;
+      pingSumRef.current += pingDelayRef.current;
+      pingCountRef.current += 1;
+      console.log(
+        "pong took ",
+        pingDelayRef.current,
+        "ms",
+        " avg: ",
+        pingSumRef.current / pingCountRef.current,
+        "ms"
+      );
     });
 
     socket.on("user_joined", (data) => {
@@ -72,6 +91,15 @@ function RoomPage() {
     });
   };
 
+  const sendPing = () => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "ping",
+    });
+    pingTimeRef.current = Date.now();
+    console.log("ping");
+  };
+
   return (
     <PageWrapper>
       <button
@@ -79,7 +107,14 @@ function RoomPage() {
           sendMessage();
         }}
       >
-        AAA
+        Send Message
+      </button>
+      <button
+        onClick={() => {
+          sendPing();
+        }}
+      >
+        Ping
       </button>
       <TopBar>
         <TitleDiv>
@@ -104,6 +139,8 @@ function RoomPage() {
             videoId={"XrHjKN2bjb0"}
             onReady={(e) => {
               playerRef.current = e.target;
+              playerRef.current.playVideo();
+              playerRef.current.pauseVideo();
               console.log("Ready to play");
             }}
             opts={{
@@ -116,6 +153,7 @@ function RoomPage() {
                 disablekb: 1,
                 controls: 0,
                 showinfo: 0,
+                mute: 1,
               },
             }}
           />
@@ -132,7 +170,15 @@ function RoomPage() {
                 room_id: id,
                 message_type: "play",
               });
-              playerRef.current.playVideo();
+              //wait until request reaches server
+              setTimeout(
+                () => {
+                  playerRef.current.playVideo();
+                },
+                pingCountRef.current === 0
+                  ? 0
+                  : pingSumRef.current / pingCountRef.current
+              );
             }}
           >
             Play
@@ -141,9 +187,17 @@ function RoomPage() {
             onClick={() => {
               socketRef.current.emit("send_message", {
                 room_id: id,
-                message_type: "stop",
+                message_type: "pause",
               });
-              playerRef.current.pauseVideo();
+              //wait until request reaches server
+              setTimeout(
+                () => {
+                  playerRef.current.pauseVideo();
+                },
+                pingCountRef.current === 0
+                  ? 0
+                  : pingSumRef.current / pingCountRef.current
+              );
             }}
           >
             Pause
@@ -154,6 +208,13 @@ function RoomPage() {
             }}
           >
             +5
+          </button>
+          <button
+            onClick={() => {
+              playerRef.current.unMute();
+            }}
+          >
+            Disable autoplay restriction
           </button>
         </PlayPanel>
         <UserPanel>Current Users</UserPanel>
