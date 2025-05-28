@@ -1,14 +1,16 @@
 import styled from "styled-components";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchCreateNewRoom } from "../apis/backendApis";
+import { UserContext } from "../contexts/UserContext";
 
 function RoomCreatePanel() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [userlimit, setUserLimit] = useState(2);
   const navigate = useNavigate();
+  const { userName } = useContext(UserContext);
 
   const handleSetName = (e) => {
     setName(e.target.value);
@@ -27,12 +29,11 @@ function RoomCreatePanel() {
   };
 
   const handleCreate = async () => {
-    const host = localStorage.getItem("livetune-username");
     const result = await fetchCreateNewRoom(
       name,
       description,
       userlimit,
-      host,
+      userName,
       false
     );
     if (result) {

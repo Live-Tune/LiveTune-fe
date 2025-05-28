@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -7,10 +7,11 @@ import { fetchRoomInfo } from "../apis/backendApis";
 import { useNavigate, useParams } from "react-router-dom";
 import { backendEndpoint } from "../apis/backendApis";
 import { io } from "socket.io-client";
+import { UserContext } from "../contexts/UserContext";
 
 function RoomPage() {
   const id = useParams().id;
-  const user = localStorage.getItem("livetune-username");
+  const { userName } = useContext(UserContext);
   const playerRef = useRef(null);
   const [roomInfo, setRoomInfo] = useState(null);
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ function RoomPage() {
 
     const socket = io(backendEndpoint);
 
-    socket.emit("join_room", { room_id: id, user });
+    socket.emit("join_room", { room_id: id, userName });
 
     socket.on("connect", () => {
       console.log("Connected");
@@ -78,7 +79,7 @@ function RoomPage() {
     socketRef.current = socket;
 
     return () => {
-      socket.emit("leave_room", { room_id: id, user });
+      socket.emit("leave_room", { room_id: id, user: userName });
       socket.disconnect();
     };
   }, []);

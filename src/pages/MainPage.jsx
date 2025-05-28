@@ -1,23 +1,19 @@
 import styled from "styled-components";
 import { LiveTuneLogoBig } from "../styles/GlobalStyle";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import RoomControlPanel from "../components/RoomControlPanel";
 import RoomSearchPanel from "../components/RoomSearchPanel";
+import { UserContext } from "../contexts/UserContext";
 
 function MainPage() {
-  const [username, setUsername] = useState("Guest");
-
-  useEffect(() => {
-    const storedName = localStorage.getItem("livetune-username");
-    if (storedName) setUsername(storedName);
-  }, []);
+  const { userName } = useContext(UserContext);
 
   return (
     <Wrapper>
       <Header>
         <LiveTuneLogoBig />
         <Title>LiveTune</Title>
-        <Welcome>Welcome, {username} 👋</Welcome>
+        <Welcome>Welcome, {userName} 👋</Welcome>
       </Header>
 
       <Content>

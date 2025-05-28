@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useContext } from "react";
 import styled from "styled-components";
 import { LiveTuneLogoBig } from "../styles/GlobalStyle";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserContext";
 
 function LoginPanel() {
-  const [username, setUsername] = useState("");
+  const { userName, setUserName } = useContext(UserContext);
 
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (username.trim()) {
-      localStorage.setItem("livetune-username", username);
+    if (userName.trim()) {
       navigate("/main"); // or "/RoomPanel" — wherever you want to land
     } else {
       alert("Please enter a username");
@@ -27,8 +27,8 @@ function LoginPanel() {
       <Input
         type="text"
         placeholder="Enter your username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
       />
       <Button onClick={handleLogin}>Next</Button>
     </Card>
