@@ -28,7 +28,10 @@ function RoomPage() {
     };
     update();
 
-    const socket = io(backendEndpoint);
+    const socket = io(backendEndpoint, {
+      path: "/socket.io",
+      transports: ["websocket"],
+    });
 
     socket.emit("join_room", { room_id: id, user: userName });
 
@@ -145,8 +148,8 @@ function RoomPage() {
               console.log("Ready to play");
             }}
             opts={{
-              height: 390 / 2,
-              width: 640 / 2,
+              height: "200px",
+              width: "100%",
               playerVars: {
                 autoplay: 0,
                 rel: 0,
