@@ -10,11 +10,19 @@ export function LiveTuneLogoBig() {
 
 export function LiveTuneLogoSmall() {
   return (
-    <LiveTuneLogo src={logo} alt="LiveTune Logo" style={{ width: "75px" }} />
+    <LiveTuneLogoGreen
+      src={logo}
+      alt="LiveTune Logo"
+      style={{ width: "75px" }}
+    />
   );
 }
 
 const LiveTuneLogo = styled.img`
   width: 150px;
   filter: hue-rotate(140deg) saturate(200%) brightness(40%);
+`;
+
+const LiveTuneLogoGreen = styled.img`
+  width: 150px;
 `;
