@@ -1,13 +1,18 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
 import { fetchRoomInfo } from "../apis/backendApis";
 import { useNavigate, useParams } from "react-router-dom";
 import { backendEndpoint } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Forward5 from "@mui/icons-material/Forward5";
+import Replay5 from "@mui/icons-material/Replay5";
+import PlayCircleFilled from "@mui/icons-material/PlayCircleFilled";
+import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
+import SkipNext from "@mui/icons-material/SkipNext";
 
 function RoomPage() {
   const id = useParams().id;
@@ -21,6 +26,17 @@ function RoomPage() {
   const pingDelayRef = useRef(0);
   const pingSumRef = useRef(0);
   const pingCountRef = useRef(0);
+
+  const YTState = {
+    UNSTARTED: -1,
+    ENDED: 0,
+    PLAYING: 1,
+    PAUSED: 2,
+    BUFFERING: 3,
+    CUED: 5,
+  };
+
+  const [playState, setPlayState] = useState(YTState.UNSTARTED);
 
   useEffect(() => {
     const update = async () => {
@@ -104,22 +120,54 @@ function RoomPage() {
     console.log("ping");
   };
 
+  const broadcastPlay = () => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "play",
+    });
+    //wait until request reaches server
+    setTimeout(
+      () => {
+        playerRef.current.playVideo();
+      },
+      pingCountRef.current === 0 ? 0 : pingSumRef.current / pingCountRef.current
+    );
+  };
+
+  const broadcastPause = () => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "pause",
+    });
+    //wait until request reaches server
+    setTimeout(
+      () => {
+        playerRef.current.pauseVideo();
+      },
+      pingCountRef.current === 0 ? 0 : pingSumRef.current / pingCountRef.current
+    );
+  };
+
+  const isPlaying = () =>
+    playState === YTState.PLAYING || playState === YTState.BUFFERING;
+
+  const handlePlayPauseToggle = () => {
+    console.log(playState);
+    if (isPlaying()) {
+      broadcastPause();
+      setPlayState(1);
+    } else {
+      broadcastPlay();
+      setPlayState(2);
+    }
+  };
+
+  const jumpTo = (second) => {
+    playerRef.current.seekTo(playerRef.current.getCurrentTime() + second);
+  };
+
   return (
     <PageWrapper>
-      <button
-        onClick={() => {
-          sendMessage();
-        }}
-      >
-        Send Message
-      </button>
-      <button
-        onClick={() => {
-          sendPing();
-        }}
-      >
-        Ping
-      </button>
       <TopBar>
         <TitleDiv>
           <ArrowBackIcon
@@ -160,59 +208,38 @@ function RoomPage() {
                 mute: 1,
               },
             }}
+            onStateChange={(e) => {
+              setPlayState(e.data);
+            }}
           />
-          <button
+          <SmallButton
             onClick={() => {
-              playerRef.current.seekTo(playerRef.current.getCurrentTime() - 5);
+              jumpTo(-5);
             }}
           >
-            -5
-          </button>
-          <button
+            <Replay5 />
+          </SmallButton>
+          <BigButton
             onClick={() => {
-              socketRef.current.emit("send_message", {
-                room_id: id,
-                message_type: "play",
-              });
-              //wait until request reaches server
-              setTimeout(
-                () => {
-                  playerRef.current.playVideo();
-                },
-                pingCountRef.current === 0
-                  ? 0
-                  : pingSumRef.current / pingCountRef.current
-              );
+              handlePlayPauseToggle();
             }}
           >
-            Play
-          </button>
-          <button
+            {isPlaying() ? <PauseCircleFilled /> : <PlayCircleFilled />}
+          </BigButton>
+          <SmallButton
             onClick={() => {
-              socketRef.current.emit("send_message", {
-                room_id: id,
-                message_type: "pause",
-              });
-              //wait until request reaches server
-              setTimeout(
-                () => {
-                  playerRef.current.pauseVideo();
-                },
-                pingCountRef.current === 0
-                  ? 0
-                  : pingSumRef.current / pingCountRef.current
-              );
+              jumpTo(+5);
             }}
           >
-            Pause
-          </button>
-          <button
+            <Forward5 />
+          </SmallButton>
+          <SmallButton
             onClick={() => {
-              playerRef.current.seekTo(playerRef.current.getCurrentTime() + 5);
+              console.log("skip");
             }}
           >
-            +5
-          </button>
+            <SkipNext />
+          </SmallButton>
           <button
             onClick={() => {
               playerRef.current.unMute();
@@ -220,12 +247,44 @@ function RoomPage() {
           >
             Disable autoplay restriction
           </button>
+          <button
+            onClick={() => {
+              sendMessage();
+            }}
+          >
+            Send Message
+          </button>
+          <button
+            onClick={() => {
+              sendPing();
+            }}
+          >
+            Ping
+          </button>
         </PlayPanel>
         <UserPanel>Current Users</UserPanel>
       </PanelWrapper>
     </PageWrapper>
   );
 }
+
+const BigButton = styled.button`
+  background-color: transparent;
+  border: none;
+  color: white;
+  svg {
+    font-size: 50px;
+  }
+`;
+
+const SmallButton = styled.button`
+  background-color: transparent;
+  border: none;
+  color: white;
+  svg {
+    font-size: 40px;
+  }
+`;
 
 const TitleDiv = styled.div`
   font-size: 30px;
