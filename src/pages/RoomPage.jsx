@@ -13,6 +13,7 @@ import Replay5 from "@mui/icons-material/Replay5";
 import PlayCircleFilled from "@mui/icons-material/PlayCircleFilled";
 import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
+import Slider from "@mui/material/Slider";
 
 function RoomPage() {
   const id = useParams().id;
@@ -37,6 +38,27 @@ function RoomPage() {
   };
 
   const [playState, setPlayState] = useState(YTState.UNSTARTED);
+  const [duration, setDuration] = useState(0);
+  const [currentTimeStamp, setCurrentTimeStamp] = useState(0);
+  const [sliderValue, setSliderValue] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef.current && isPlaying() && !isDragging) {
+        const current = playerRef.current.getCurrentTime();
+        setCurrentTimeStamp(current);
+        setSliderValue(current);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [playState, isDragging]);
 
   useEffect(() => {
     const update = async () => {
@@ -152,7 +174,6 @@ function RoomPage() {
     playState === YTState.PLAYING || playState === YTState.BUFFERING;
 
   const handlePlayPauseToggle = () => {
-    console.log(playState);
     if (isPlaying()) {
       broadcastPause();
       setPlayState(1);
@@ -189,8 +210,9 @@ function RoomPage() {
           <YouTube
             ref={playerRef}
             videoId={"XrHjKN2bjb0"}
-            onReady={(e) => {
+            onReady={async (e) => {
               playerRef.current = e.target;
+              setDuration(await e.target.getDuration());
               playerRef.current.playVideo();
               playerRef.current.pauseVideo();
               console.log("Ready to play");
@@ -210,6 +232,48 @@ function RoomPage() {
             }}
             onStateChange={(e) => {
               setPlayState(e.data);
+            }}
+          />
+          <div
+            style={{
+              color: "white",
+              marginBottom: "10px",
+              textAlign: "center",
+            }}
+          >
+            {formatTime(isDragging ? sliderValue : currentTimeStamp)} /{" "}
+            {formatTime(duration)}
+          </div>
+          <Slider
+            value={isDragging ? sliderValue : currentTimeStamp}
+            onChange={(e, newValue) => {
+              setIsDragging(true);
+              setSliderValue(newValue);
+            }}
+            onChangeCommitted={(e, newValue) => {
+              playerRef.current.seekTo(newValue, true);
+              setCurrentTimeStamp(newValue);
+              setSliderValue(newValue);
+              setIsDragging(false);
+            }}
+            max={duration}
+            valueLabelDisplay="auto"
+            valueLabelFormat={formatTime}
+            sx={{
+              color: "white",
+              "& .MuiSlider-thumb": {
+                color: "white",
+              },
+              "& .MuiSlider-rail": {
+                color: "white",
+              },
+              "& .MuiSlider-track": {
+                color: "white",
+              },
+              "& .MuiSlider-valueLabel": {
+                color: "black",
+                backgroundColor: "white",
+              },
             }}
           />
           <SmallButton
