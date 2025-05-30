@@ -6,14 +6,12 @@ import RoomCreatePage from "../pages/RoomCreatePage";
 
 function Router() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />{" "}
-        <Route path="/RoomCreatePanel" element={<RoomCreatePage />} />
-        <Route path="/RoomPage/:id" element={<RoomPage />} />
-        <Route path="/main" element={<MainPanel />} />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<LoginPage />} />{" "}
+      <Route path="/RoomCreatePanel" element={<RoomCreatePage />} />
+      <Route path="/RoomPage/:id" element={<RoomPage />} />
+      <Route path="/main" element={<MainPanel />} />
+    </Routes>
   );
 }
 
