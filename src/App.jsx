@@ -1,19 +1,22 @@
-import styled from "styled-components";
-import "./App.css";
+import { useState } from "react";
+import { UserContext } from "./contexts/UserContext";
+import Router from "./shared/Router";
+import { BackgroundGradient } from "./styles/BackgroundGradient";
+import Wave from "./styles/Wave";
+import { useLocation } from "react-router-dom";
 
 function App() {
+  const [userName, setUserName] = useState("");
+  const shouldHideWave = useLocation().pathname.includes("/RoomPage");
+
   return (
-    <>
-      <YourCustomButton>Button</YourCustomButton>
-    </>
+    <BackgroundGradient>
+      <UserContext.Provider value={{ userName, setUserName }}>
+        <Router />
+      </UserContext.Provider>
+      {!shouldHideWave && <Wave />}
+    </BackgroundGradient>
   );
 }
-
-const YourCustomButton = styled.button`
-  width: 200px;
-  height: 200px;
-  background-color: yellow;
-  color: green;
-`;
 
 export default App;
