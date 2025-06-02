@@ -1,6 +1,7 @@
 # 📝 Contributing to LiveTune Front-end
 
 Thank you for your interest in contributing! We're excited to collaborate and improve the LiveTune platform together. Please take a few moments to review this guide before you begin.
+[한글 CONTRIBUTING 바로가기](./docs/CONTRIBUTING_ko.md)
 
 > [!IMPORTANT]
 > For developers interested in contributing to this project, please read the following carefully.
@@ -75,6 +76,15 @@ npm run dev
 
 - When committing, please use `git commit` without the `-m` option and adhere to the template format.
 - If you have push access to this project, please refrain from using the `--force` option, as it can overwrite the work of other collaborators.
+
+### Develop
+
+1. Fork this repository.
+2. Make separate branch called '${YourGithubID}/contribute'
+3. Work on that branch
+4. Request PR with explanation. Include followings.
+   - what did you do
+   - why this is needed for our project.
 
 ---
 

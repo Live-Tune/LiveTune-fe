@@ -2,6 +2,7 @@
 
 Welcome to the **LiveTune Front-end** repository!  
 This project contains the front-end logic for the LiveTune app.
+[한글 README 바로가기](./docs/README_ko.md)
 
 ![mainPageDemo](./public/mainPageDemo.png)
 
