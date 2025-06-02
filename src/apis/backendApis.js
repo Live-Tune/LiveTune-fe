@@ -1,7 +1,8 @@
 const isDev = window.location.hostname === "localhost";
 export const backendEndpoint = isDev
   ? "http://127.0.0.1:5000"
-  : "https://livetune-testing.onrender.com";
+  : "https://sootation.synology.me:8001";
+//"https://livetune-testing.onrender.com"
 
 async function actionGET(apiEntry) {
   try {
@@ -52,6 +53,12 @@ export async function fetchCreateNewRoom(
 
 export async function fetchRoomInfo(id) {
   const apiEntry = `/api/room/info?id=${id}`;
+  const data = await actionGET(apiEntry);
+  return data;
+}
+
+export async function fetchRoomId(name) {
+  const apiEntry = `/api/room/getid?name=${name}`;
   const data = await actionGET(apiEntry);
   return data;
 }

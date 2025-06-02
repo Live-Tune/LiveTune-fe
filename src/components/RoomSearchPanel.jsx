@@ -3,7 +3,11 @@ import styled from "styled-components";
 import { FaSearch } from "react-icons/fa";
 import { MdArrowDropDown } from "react-icons/md";
 import { useEffect, useState } from "react";
-import { fetchAvailableRooms } from "../apis/backendApis";
+import {
+  fetchAvailableRooms,
+  fetchRoomId,
+  fetchRoomInfo,
+} from "../apis/backendApis";
 import { useNavigate } from "react-router-dom";
 
 function RoomSearchPanel() {
@@ -29,18 +33,44 @@ function RoomSearchPanel() {
     const update = async () => {
       const fetchedRoomList = await fetchAvailableRooms();
       setRoomList(fetchedRoomList);
+      console.log(await fetchRoomId("asdf"));
     };
     update();
   }, []);
+
+  const [searchRoomName, setSearchRoomName] = useState("");
 
   return (
     <PanelBox>
       <SearchWrapper>
         <SearchHeader>
-          <SearchIcon>
+          <SearchIcon
+            onClick={async () => {
+              const room = await fetchRoomId(searchRoomName);
+              if (room.id) {
+                const roomInfo = await fetchRoomInfo(room.id);
+                console.log(roomInfo);
+                setRoomList([
+                  {
+                    id: room.id,
+                    name: roomInfo.name,
+                    description: roomInfo.description,
+                    max_user: roomInfo.max_user,
+                    currentUsers: [],
+                  },
+                ]);
+              } else {
+                alert("Room not found");
+              }
+            }}
+          >
             <FaSearch />
           </SearchIcon>
-          <SearchInput placeholder="Search by name" />
+          <SearchInput
+            placeholder="Search by name"
+            onChange={(e) => setSearchRoomName(e.target.value)}
+            value={searchRoomName}
+          />
           {/* Tag not implemented in current stage */}
           {/* <Tag>#kpop</Tag>
           <Tag>#rock</Tag>
