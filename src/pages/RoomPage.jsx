@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
 import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
-import { fetchRoomInfo } from "../apis/backendApis";
+import { fetchRoomInfo, fetchUserInfo } from "../apis/backendApis";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -14,13 +14,27 @@ function RoomPage() {
   const navigate = useNavigate();
   const { uid } = useContext(UserContext);
 
+  const [currentUsers, setCurrentUsers] = useState([uid]);
+  const [currentUsersNameDisplay, setCurrentUsersNameDisplay] = useState([]);
+
+  useEffect(() => {
+    setCurrentUsersNameDisplay(
+      currentUsers.map(async (uid) => {
+        const userInfo = await fetchUserInfo(uid);
+        return userInfo.username;
+      })
+    );
+  }, [currentUsers]);
+
   useEffect(() => {
     if (!uid) {
       navigate("/");
       return;
     }
     const update = async () => {
-      setRoomInfo(await fetchRoomInfo(id));
+      const roomInfo = await fetchRoomInfo(id);
+      setRoomInfo(roomInfo);
+      setCurrentUsers(roomInfo.current_users);
     };
     update();
   }, []);
@@ -45,9 +59,14 @@ function RoomPage() {
         <QueuePanel>Queue</QueuePanel>
         <PlayPanel>
           Currently Playing
-          <YoutubePanel id={id} />
+          <YoutubePanel setCurrentUsers={setCurrentUsers} id={id} />
         </PlayPanel>
-        <UserPanel>Current Users</UserPanel>
+        <UserPanel>
+          Current Users
+          {currentUsersNameDisplay.map((name, i) => {
+            return <p key={i}>{name}</p>;
+          })}
+        </UserPanel>
       </PanelWrapper>
     </PageWrapper>
   );

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
-import { backendEndpoint } from "../apis/backendApis";
+import { backendEndpoint, fetchRoomInfo } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -12,7 +12,7 @@ import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
 
-function YoutubePanel({ id }) {
+function YoutubePanel({ setCurrentUsers, id }) {
   const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
   const socketRef = useRef(null);
@@ -98,12 +98,14 @@ function YoutubePanel({ id }) {
       );
     });
 
-    socket.on("user_joined", (data) => {
-      console.log(data);
+    socket.on("user_joined", async (data) => {
+      console.log(`${data.uid} joined the room`);
+      setCurrentUsers((prev) => [...prev, data.uid]);
     });
 
-    socket.on("user_joined", (data) => {
-      console.log(`${data.user} joined the room`);
+    socket.on("user_left", async (data) => {
+      console.log(`${data.uid} left the room`);
+      setCurrentUsers((prev) => prev.filter((uid) => uid !== data.uid));
     });
 
     socketRef.current = socket;

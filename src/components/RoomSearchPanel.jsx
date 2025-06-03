@@ -50,7 +50,7 @@ function RoomSearchPanel() {
           name: roomInfo.name,
           description: roomInfo.description,
           max_user: roomInfo.max_user,
-          currentUsers: roomInfo.currentUsers,
+          current_users: roomInfo.current_users,
         },
       ]);
     } else {
