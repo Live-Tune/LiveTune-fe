@@ -1,7 +1,7 @@
 const isDev = window.location.hostname === "localhost";
 export const backendEndpoint = isDev
-  ? "http://127.0.0.1:5000"
-  : "https://sootation.synology.me:8001";
+  ? "https://livetune-testing.onrender.com"
+  : "https://livetune-testing.onrender.com";
 //"https://livetune-testing.onrender.com"
 
 async function actionGET(apiEntry) {
