@@ -10,7 +10,7 @@ function RoomCreatePanel() {
   const [description, setDescription] = useState("");
   const [userlimit, setUserLimit] = useState(2);
   const navigate = useNavigate();
-  const { userName } = useContext(UserContext);
+  const { uid } = useContext(UserContext);
 
   const handleSetName = (e) => {
     setName(e.target.value);
@@ -29,11 +29,15 @@ function RoomCreatePanel() {
   };
 
   const handleCreate = async () => {
+    if (!name) {
+      alert("Please fill the title");
+      return;
+    }
     const result = await fetchCreateNewRoom(
       name,
       description,
       userlimit,
-      userName,
+      uid,
       false
     );
     if (result) {
@@ -49,7 +53,7 @@ function RoomCreatePanel() {
         </BackButton>
         &nbsp;&nbsp;Create public room
       </TitleP>
-      <p>Room name*</p>
+      <p>Room title*</p>
       <Input
         type="text"
         placeholder="Title your room with unique name"

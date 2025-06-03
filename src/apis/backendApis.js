@@ -1,12 +1,29 @@
 const isDev = window.location.hostname === "localhost";
 export const backendEndpoint = isDev
-  ? "http://127.0.0.1:5000"
-  : "https://sootation.synology.me:8001";
+  ? "http://localhost:5000"
+  : "https://livetune-testing.onrender.com";
 //"https://livetune-testing.onrender.com"
 
 async function actionGET(apiEntry) {
   try {
     const response = await fetch(`${backendEndpoint}${apiEntry}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+async function actionPOST(apiEntry, body) {
+  try {
+    const response = await fetch(`${backendEndpoint}${apiEntry}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
     const data = await response.json();
     return data;
   } catch (error) {
@@ -25,28 +42,20 @@ export async function fetchCreateNewRoom(
   name,
   description,
   maxUser,
-  hostName,
+  hostUid,
   isPrivate
 ) {
   const apiEntry = "/api/room/createnew";
-  try {
-    const response = await fetch(`${backendEndpoint}${apiEntry}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name,
-        description: description,
-        max_user: maxUser,
-        host: hostName,
-        is_private: isPrivate,
-      }),
-    });
-    const id = (await response.json()).id;
-    return id;
-  } catch (error) {
-    console.log(error);
+  const data = await actionPOST(apiEntry, {
+    name: name,
+    description: description,
+    max_user: maxUser,
+    host: hostUid,
+    is_private: isPrivate,
+  });
+  if (data) {
+    return data.id;
+  } else {
     return -1;
   }
 }
@@ -59,6 +68,25 @@ export async function fetchRoomInfo(id) {
 
 export async function fetchRoomId(name) {
   const apiEntry = `/api/room/getid?name=${name}`;
+  const data = await actionGET(apiEntry);
+  return data;
+}
+
+// Users
+export async function fetchCreateNewUser(name) {
+  const apiEntry = `/api/user/create`;
+  const data = await actionPOST(apiEntry, {
+    username: name,
+  });
+  if (data) {
+    return data.uid;
+  } else {
+    return null;
+  }
+}
+
+export async function fetchUserInfo(uid) {
+  const apiEntry = `/api/user/info?id=${uid}`;
   const data = await actionGET(apiEntry);
   return data;
 }

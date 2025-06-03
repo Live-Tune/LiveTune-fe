@@ -1,4 +1,3 @@
-// ✅ RoomSearchPanel.jsx
 import styled from "styled-components";
 import { FaSearch } from "react-icons/fa";
 import { MdArrowDropDown } from "react-icons/md";
@@ -9,6 +8,7 @@ import {
   fetchRoomInfo,
 } from "../apis/backendApis";
 import { useNavigate } from "react-router-dom";
+import Refresh from "@mui/icons-material/Refresh";
 
 function RoomSearchPanel() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -28,42 +28,47 @@ function RoomSearchPanel() {
 
   const navigate = useNavigate();
   const [roomList, setRoomList] = useState([]);
+  const [searchRoomName, setSearchRoomName] = useState("");
 
   useEffect(() => {
-    const update = async () => {
-      const fetchedRoomList = await fetchAvailableRooms();
-      setRoomList(fetchedRoomList);
-      console.log(await fetchRoomId("asdf"));
-    };
-    update();
+    getAvailableRooms();
   }, []);
 
-  const [searchRoomName, setSearchRoomName] = useState("");
+  const getAvailableRooms = async () => {
+    const fetchedRoomList = await fetchAvailableRooms();
+    setRoomList(fetchedRoomList);
+  };
+
+  const handleSearch = async () => {
+    const room = await fetchRoomId(searchRoomName);
+    if (room && room.id) {
+      const roomInfo = await fetchRoomInfo(room.id);
+      console.log(roomInfo);
+      setRoomList([
+        {
+          id: room.id,
+          name: roomInfo.name,
+          description: roomInfo.description,
+          max_user: roomInfo.max_user,
+          currentUsers: roomInfo.currentUsers,
+        },
+      ]);
+    } else {
+      getAvailableRooms();
+      alert("Room not found!");
+    }
+  };
 
   return (
     <PanelBox>
       <SearchWrapper>
-        <SearchHeader>
-          <SearchIcon
-            onClick={async () => {
-              const room = await fetchRoomId(searchRoomName);
-              if (room.id) {
-                const roomInfo = await fetchRoomInfo(room.id);
-                console.log(roomInfo);
-                setRoomList([
-                  {
-                    id: room.id,
-                    name: roomInfo.name,
-                    description: roomInfo.description,
-                    max_user: roomInfo.max_user,
-                    currentUsers: [],
-                  },
-                ]);
-              } else {
-                alert("Room not found");
-              }
-            }}
-          >
+        <SearchHeader
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+        >
+          <SearchIcon onClick={handleSearch}>
             <FaSearch />
           </SearchIcon>
           <SearchInput
@@ -71,12 +76,7 @@ function RoomSearchPanel() {
             onChange={(e) => setSearchRoomName(e.target.value)}
             value={searchRoomName}
           />
-          {/* Tag not implemented in current stage */}
-          {/* <Tag>#kpop</Tag>
-          <Tag>#rock</Tag>
-          <DropdownIcon onClick={() => setShowDropdown((prev) => !prev)}>
-            <MdArrowDropDown />
-          </DropdownIcon> */}
+          <Refresh onClick={getAvailableRooms} />
         </SearchHeader>
 
         {showDropdown && (
@@ -89,36 +89,62 @@ function RoomSearchPanel() {
       </SearchWrapper>
 
       <RoomList>
-        {roomList?.map((room) => {
-          return (
-            <RoomItem key={room.id}>
-              <RoomText>
-                <RoomName>{room.name}</RoomName>
-                <RoomDesc>{room.description}</RoomDesc>
-              </RoomText>
-              <RoomJoin>
-                {room.currentUsers.length != room.max_user && (
-                  <JoinButton
-                    onClick={() => {
-                      navigate(`/RoomPage/${room.id}`);
-                    }}
-                  >
-                    Join room
-                  </JoinButton>
-                )}
-                <Listeners>
-                  Currently {room.currentUsers.length}/{room.max_user} listeners
-                </Listeners>
-              </RoomJoin>
-            </RoomItem>
-          );
-        })}
+        {roomList && roomList.length > 0 ? (
+          roomList.map((room) => {
+            const current =
+              room.current_users_number ?? room.current_users?.length ?? 0;
+            const max = room.max_user ?? 0;
+            const isFull = current >= max;
+
+            return (
+              <RoomItem key={room.id}>
+                <RoomText>
+                  <RoomName>{room.name}</RoomName>
+                  <RoomDesc>{room.description}</RoomDesc>
+                </RoomText>
+                <RoomJoin>
+                  {isFull ? (
+                    <FullButton disabled>Full room</FullButton>
+                  ) : (
+                    <JoinButton
+                      onClick={() => navigate(`/RoomPage/${room.id}`)}
+                    >
+                      Join room
+                    </JoinButton>
+                  )}
+                  <Listeners>
+                    Currently {current}/{max} listeners
+                  </Listeners>
+                </RoomJoin>
+              </RoomItem>
+            );
+          })
+        ) : (
+          <NoRoomsMessage>No rooms available.</NoRoomsMessage>
+        )}
       </RoomList>
     </PanelBox>
   );
 }
 
 export default RoomSearchPanel;
+
+const FullButton = styled.button`
+  background: #888;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 10px 25px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  cursor: not-allowed;
+`;
+
+const NoRoomsMessage = styled.p`
+  color: #aaa;
+  font-size: 16px;
+  text-align: center;
+`;
 
 const PanelBox = styled.div`
   background-color: #0f2b20;
@@ -135,7 +161,7 @@ const SearchWrapper = styled.div`
   flex-direction: column;
 `;
 
-const SearchHeader = styled.div`
+const SearchHeader = styled.form`
   background-color: #000;
   border-top-left-radius: 40px;
   border-top-right-radius: 40px;
@@ -143,6 +169,9 @@ const SearchHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  svg {
+    color: white;
+  }
 `;
 
 const SearchIcon = styled.div`

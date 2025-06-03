@@ -1,9 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
-import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
-import { fetchRoomInfo } from "../apis/backendApis";
-import { useNavigate, useParams } from "react-router-dom";
 import { backendEndpoint } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
@@ -16,7 +13,7 @@ import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
 
 function YoutubePanel({ id }) {
-  const { userName } = useContext(UserContext);
+  const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
   const socketRef = useRef(null);
 
@@ -63,7 +60,7 @@ function YoutubePanel({ id }) {
       transports: ["websocket"],
     });
 
-    socket.emit("join_room", { room_id: id, user: userName });
+    socket.emit("join_room", { room_id: id, uid });
 
     socket.on("connect", () => {
       console.log("Connected");
@@ -112,7 +109,7 @@ function YoutubePanel({ id }) {
     socketRef.current = socket;
 
     return () => {
-      socket.emit("leave_room", { room_id: id, user: userName });
+      socket.emit("leave_room", { room_id: id, uid });
       socket.disconnect();
     };
   }, []);

@@ -1,12 +1,20 @@
 import styled from "styled-components";
 import { LiveTuneLogoBig } from "../styles/GlobalStyle";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import RoomControlPanel from "../components/RoomControlPanel";
 import RoomSearchPanel from "../components/RoomSearchPanel";
 import { UserContext } from "../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 function MainPage() {
-  const { userName } = useContext(UserContext);
+  const { userName, uid } = useContext(UserContext);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!uid) {
+      navigate("/");
+      return;
+    }
+  }, []);
 
   return (
     <Wrapper>
