@@ -7,11 +7,12 @@ import { useLocation } from "react-router-dom";
 
 function App() {
   const [userName, setUserName] = useState("");
+  const [uid, setUid] = useState(null);
   const shouldHideWave = useLocation().pathname.includes("/RoomPage");
 
   return (
     <BackgroundGradient>
-      <UserContext.Provider value={{ userName, setUserName }}>
+      <UserContext.Provider value={{ userName, setUserName, uid, setUid }}>
         <Router />
       </UserContext.Provider>
       {!shouldHideWave && <Wave />}

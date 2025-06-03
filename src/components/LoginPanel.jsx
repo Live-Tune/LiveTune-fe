@@ -3,18 +3,27 @@ import styled from "styled-components";
 import { LiveTuneLogoBig } from "../styles/GlobalStyle";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
+import { fetchCreateNewUser } from "../apis/backendApis";
 
 function LoginPanel() {
-  const { userName, setUserName } = useContext(UserContext);
+  const { userName, setUserName, setUid } = useContext(UserContext);
 
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (userName.trim()) {
-      navigate("/main"); // or "/RoomPanel" — wherever you want to land
-    } else {
+  const handleLogin = async () => {
+    if (!userName.trim()) {
       alert("Please enter a username");
+      return;
     }
+    const allocatedUID = await fetchCreateNewUser(userName);
+    if (allocatedUID) {
+      setUid(allocatedUID);
+      console.log({ userName, allocatedUID });
+    } else {
+      alert("Cannot reach server. Please try again later.");
+      return;
+    }
+    navigate("/main");
   };
 
   return (

@@ -1,27 +1,24 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
 import { LiveTuneLogoSmall } from "../styles/GlobalStyle";
 import { fetchRoomInfo } from "../apis/backendApis";
 import { useNavigate, useParams } from "react-router-dom";
-import { backendEndpoint } from "../apis/backendApis";
-import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Forward5 from "@mui/icons-material/Forward5";
-import Replay5 from "@mui/icons-material/Replay5";
-import PlayCircleFilled from "@mui/icons-material/PlayCircleFilled";
-import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
-import SkipNext from "@mui/icons-material/SkipNext";
-import Slider from "@mui/material/Slider";
 import YoutubePanel from "../components/YoutubePanel";
 
 function RoomPage() {
   const id = useParams().id;
   const [roomInfo, setRoomInfo] = useState(null);
   const navigate = useNavigate();
+  const { uid } = useContext(UserContext);
 
   useEffect(() => {
+    if (!uid) {
+      navigate("/");
+      return;
+    }
     const update = async () => {
       setRoomInfo(await fetchRoomInfo(id));
     };
