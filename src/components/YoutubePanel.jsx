@@ -54,6 +54,10 @@ function YoutubePanel({ setCurrentUsers, id }) {
     return () => clearInterval(interval);
   }, [playState, isDragging]);
 
+  const [currentYoutubeId, setCurrentYoutubeId] = useState("");
+  const [queueList, setQueueList] = useState([]);
+  const [youtubeId, setYoutubeId] = useState("");
+
   useEffect(() => {
     const socket = io(backendEndpoint, {
       path: "/socket.io",
@@ -82,6 +86,27 @@ function YoutubePanel({ setCurrentUsers, id }) {
     socket.on("broadcast_pause", () => {
       console.log("Brdcst pause");
       playerRef.current.pauseVideo();
+    });
+
+    socket.on("broadcast_sync", (data) => {
+      console.log("Brdcst sync");
+      playerRef.current.seekTo(data.timestamp, true);
+      setCurrentTimeStamp(data.timestamp);
+      setSliderValue(data.timestamp);
+    });
+
+    socket.on("broadcast_add", (data) => {
+      console.log("Brdcst add");
+      setQueueList((prev) => [...prev, data.youtubeId]);
+    });
+
+    socket.on("broadcast_skip", () => {
+      console.log("Brdcst skip");
+      setQueueList((prev) => {
+        const [nextVideoId, ...rest] = prev;
+        setCurrentYoutubeId(nextVideoId);
+        return rest;
+      });
     });
 
     socket.on("pong", () => {
@@ -161,6 +186,46 @@ function YoutubePanel({ setCurrentUsers, id }) {
     );
   };
 
+  const broadcastSync = (timestamp) => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "pause",
+    });
+    playerRef.current.pauseVideo();
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "sync",
+      timestamp,
+    });
+    setTimeout(
+      () => {
+        socketRef.current.emit("send_message", {
+          room_id: id,
+          message_type: "play",
+        });
+        playerRef.current.playVideo();
+      },
+      pingCountRef.current === 0
+        ? 0
+        : (pingSumRef.current / pingCountRef.current) * 2
+    );
+  };
+
+  const broadcastAdd = (youtubeId) => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "add",
+      youtubeId,
+    });
+  };
+
+  const broadcastSkip = () => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "skip",
+    });
+  };
+
   const isPlaying = () =>
     playState === YTState.PLAYING || playState === YTState.BUFFERING;
 
@@ -175,14 +240,17 @@ function YoutubePanel({ setCurrentUsers, id }) {
   };
 
   const jumpTo = (second) => {
-    playerRef.current.seekTo(playerRef.current.getCurrentTime() + second);
+    const timestamp = playerRef.current.getCurrentTime();
+    playerRef.current.seekTo(timestamp + second);
+    setCurrentTimeStamp(timestamp + second);
+    setSliderValue(timestamp + second);
   };
 
   return (
     <>
       <YouTube
         ref={playerRef}
-        videoId={"XrHjKN2bjb0"}
+        videoId={currentYoutubeId}
         onReady={async (e) => {
           playerRef.current = e.target;
           setDuration(await e.target.getDuration());
@@ -200,7 +268,7 @@ function YoutubePanel({ setCurrentUsers, id }) {
             disablekb: 1,
             controls: 0,
             showinfo: 0,
-            mute: 1,
+            mute: 0,
           },
         }}
         onStateChange={(e) => {
@@ -224,6 +292,7 @@ function YoutubePanel({ setCurrentUsers, id }) {
           setSliderValue(newValue);
         }}
         onChangeCommitted={(e, newValue) => {
+          broadcastSync(newValue);
           playerRef.current.seekTo(newValue, true);
           setCurrentTimeStamp(newValue);
           setSliderValue(newValue);
@@ -251,6 +320,8 @@ function YoutubePanel({ setCurrentUsers, id }) {
       />
       <SmallButton
         onClick={() => {
+          const timestamp = playerRef.current.getCurrentTime() - 5;
+          broadcastSync(timestamp);
           jumpTo(-5);
         }}
       >
@@ -265,6 +336,8 @@ function YoutubePanel({ setCurrentUsers, id }) {
       </BigButton>
       <SmallButton
         onClick={() => {
+          const timestamp = playerRef.current.getCurrentTime() + 5;
+          broadcastSync(timestamp);
           jumpTo(+5);
         }}
       >
@@ -272,32 +345,74 @@ function YoutubePanel({ setCurrentUsers, id }) {
       </SmallButton>
       <SmallButton
         onClick={() => {
-          console.log("skip");
+          broadcastSkip();
+          setCurrentYoutubeId(queueList[0]);
+          setQueueList(queueList.filter((yid, i) => i !== 0));
         }}
       >
         <SkipNext />
       </SmallButton>
-      <button
-        onClick={() => {
-          playerRef.current.unMute();
-        }}
-      >
-        Disable autoplay restriction
-      </button>
-      <button
-        onClick={() => {
-          sendMessage();
-        }}
-      >
-        Send Message
-      </button>
-      <button
-        onClick={() => {
-          sendPing();
-        }}
-      >
-        Ping
-      </button>
+      <div>
+        <button
+          onClick={() => {
+            sendMessage();
+          }}
+        >
+          Send Message
+        </button>
+        <button
+          onClick={() => {
+            sendPing();
+          }}
+        >
+          Ping
+        </button>
+        <button
+          onClick={() => {
+            const timestamp = playerRef.current.getCurrentTime();
+            broadcastSync(timestamp);
+          }}
+        >
+          Sync
+        </button>
+      </div>
+      <div>
+        <input
+          type="text"
+          placeholder="Youtube ID"
+          onChange={(e) => setYoutubeId(e.target.value)}
+          value={youtubeId}
+        />
+        <button
+          onClick={() => {
+            broadcastAdd(youtubeId);
+            setQueueList((prev) => [...prev, youtubeId]);
+          }}
+        >
+          Add
+        </button>
+        <button
+          onClick={() => {
+            const coolList = [
+              "T3eEZ-_2m9w",
+              "4z7oi-QxE8s",
+              "0KlnDwNqIp8",
+              "v1CP04sTG0A",
+            ];
+            for (let i = 0; i < coolList.length; i++) {
+              broadcastAdd(coolList[i]);
+            }
+            setQueueList(coolList);
+          }}
+        >
+          Load it up with good soongs
+        </button>
+      </div>
+      <div>
+        {queueList.map((yid) => {
+          return <p key={yid}>{yid}</p>;
+        })}
+      </div>
     </>
   );
 }
