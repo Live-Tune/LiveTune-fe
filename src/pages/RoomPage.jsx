@@ -16,15 +16,8 @@ function RoomPage() {
 
   const [currentUsers, setCurrentUsers] = useState([uid]);
   const [currentUsersNameDisplay, setCurrentUsersNameDisplay] = useState([]);
-  //const [queueList, setQueueList] = useState([]);
-  //DUMMY QUEUE
-
-const [queueList, setQueueList] = useState([
-  { youtubeId: "YkgKThdzX-8", title: "Imagine" },
-  { youtubeId: "Zi_XLOBDo_Y", title: "Billie Jean" },
-  { youtubeId: "hTWKbfoikeg", title: "Smells Like Teen Spirit" },
-]);
-
+  const [queueList, setQueueList] = useState([]);
+  const [currentYoutubeId, setCurrentYoutubeId] = useState("");
 
   useEffect(() => {
     setCurrentUsersNameDisplay(
@@ -44,6 +37,10 @@ const [queueList, setQueueList] = useState([
       const roomInfo = await fetchRoomInfo(id);
       setRoomInfo(roomInfo);
       setCurrentUsers(roomInfo.current_users);
+      setQueueList(roomInfo.queue);
+      setCurrentYoutubeId(
+        roomInfo.current_song ? roomInfo.current_song.youtubeId : ""
+      );
     };
     update();
   }, []);
@@ -66,16 +63,16 @@ const [queueList, setQueueList] = useState([
       </TopBar>
       <PanelWrapper>
         <QueuePanel>
-        <QueueHeader>Queue</QueueHeader>
-{queueList.map((song, i) => (
-  <QueueItem key={song.youtubeId}>
-    <span role="img" aria-label="music">🎵</span> {song.title}
-  </QueueItem>
-))}
-
-
-
-      </QueuePanel>
+          <QueueHeader>Queue</QueueHeader>
+          {queueList.map((song, i) => (
+            <QueueItem key={song.youtubeId}>
+              <span role="img" aria-label="music">
+                🎵
+              </span>{" "}
+              {song.title}
+            </QueueItem>
+          ))}
+        </QueuePanel>
 
         <PlayPanel>
           Currently Playing
@@ -84,8 +81,9 @@ const [queueList, setQueueList] = useState([
             id={id}
             queueList={queueList}
             setQueueList={setQueueList}
+            currentYoutubeId={currentYoutubeId}
+            setCurrentYoutubeId={setCurrentYoutubeId}
           />
-
         </PlayPanel>
         <UserPanel>
           Current Users

@@ -1,7 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import YouTube from "react-youtube";
 import styled from "styled-components";
-import { backendEndpoint, fetchRoomInfo } from "../apis/backendApis";
+import {
+  backendEndpoint,
+  fetchRoomInfo,
+  fetchVideoTitle,
+} from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -12,8 +16,14 @@ import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
 
-function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
-
+function YoutubePanel({
+  setCurrentUsers,
+  id,
+  queueList,
+  setQueueList,
+  currentYoutubeId,
+  setCurrentYoutubeId,
+}) {
   const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
   const socketRef = useRef(null);
@@ -55,8 +65,8 @@ function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
     return () => clearInterval(interval);
   }, [playState, isDragging]);
 
-  const [currentYoutubeId, setCurrentYoutubeId] = useState("");
   const [youtubeId, setYoutubeId] = useState("");
+  const syncBufferRef = useRef(null);
 
   useEffect(() => {
     const socket = io(backendEndpoint, {
@@ -95,16 +105,21 @@ function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
       setSliderValue(data.timestamp);
     });
 
+    socket.on("req_sync", () => {
+      console.log("Req sync");
+      broadcastSync(playerRef.current.getCurrentTime());
+    });
+
     socket.on("broadcast_add", (data) => {
       console.log("Brdcst add");
-      setQueueList((prev) => [...prev, data.youtubeId]);
+      setQueueList((prev) => [...prev, data.video]);
     });
 
     socket.on("broadcast_skip", () => {
       console.log("Brdcst skip");
       setQueueList((prev) => {
         const [nextVideoId, ...rest] = prev;
-        setCurrentYoutubeId(nextVideoId);
+        setCurrentYoutubeId(nextVideoId.youtubeId);
         return rest;
       });
     });
@@ -126,6 +141,9 @@ function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
     socket.on("user_joined", async (data) => {
       console.log(`${data.uid} joined the room`);
       setCurrentUsers((prev) => [...prev, data.uid]);
+      if (uid !== data.uid) {
+        broadcastSync(playerRef.current.getCurrentTime());
+      }
     });
 
     socket.on("user_left", async (data) => {
@@ -189,33 +207,16 @@ function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
   const broadcastSync = (timestamp) => {
     socketRef.current.emit("send_message", {
       room_id: id,
-      message_type: "pause",
-    });
-    playerRef.current.pauseVideo();
-    socketRef.current.emit("send_message", {
-      room_id: id,
       message_type: "sync",
       timestamp,
     });
-    setTimeout(
-      () => {
-        socketRef.current.emit("send_message", {
-          room_id: id,
-          message_type: "play",
-        });
-        playerRef.current.playVideo();
-      },
-      pingCountRef.current === 0
-        ? 0
-        : (pingSumRef.current / pingCountRef.current) * 2
-    );
   };
 
-  const broadcastAdd = (youtubeId) => {
+  const broadcastAdd = (youtubeId, title) => {
     socketRef.current.emit("send_message", {
       room_id: id,
       message_type: "add",
-      youtubeId,
+      video: { youtubeId, title },
     });
   };
 
@@ -223,6 +224,13 @@ function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
     socketRef.current.emit("send_message", {
       room_id: id,
       message_type: "skip",
+    });
+  };
+
+  const requestSync = () => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "req_sync",
     });
   };
 
@@ -319,87 +327,102 @@ function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
         }}
       />
       <ButtonRow>
-      <SmallButton
-        onClick={() => {
-          const timestamp = playerRef.current.getCurrentTime() - 5;
-          broadcastSync(timestamp);
-          jumpTo(-5);
-        }}
-      >
-        <Replay5 />
-      </SmallButton>
-      <BigButton
-        onClick={() => {
-          handlePlayPauseToggle();
-        }}
-      >
-        {isPlaying() ? <PauseCircleFilled /> : <PlayCircleFilled />}
-      </BigButton>
-      <SmallButton
-        onClick={() => {
-          const timestamp = playerRef.current.getCurrentTime() + 5;
-          broadcastSync(timestamp);
-          jumpTo(+5);
-        }}
-      >
-        <Forward5 />
-      </SmallButton>
-      <SmallButton
-        onClick={() => {
-          broadcastSkip();
-          setCurrentYoutubeId(queueList[0]);
-          setQueueList(queueList.filter((yid, i) => i !== 0));
-        }}
-      >
-        <SkipNext />
-      </SmallButton>
-
+        <SmallButton
+          onClick={() => {
+            const timestamp = playerRef.current.getCurrentTime() - 5;
+            broadcastSync(timestamp);
+            jumpTo(-5);
+          }}
+        >
+          <Replay5 />
+        </SmallButton>
+        <BigButton
+          onClick={() => {
+            handlePlayPauseToggle();
+          }}
+        >
+          {isPlaying() ? <PauseCircleFilled /> : <PlayCircleFilled />}
+        </BigButton>
+        <SmallButton
+          onClick={() => {
+            const timestamp = playerRef.current.getCurrentTime() + 5;
+            broadcastSync(timestamp);
+            jumpTo(+5);
+          }}
+        >
+          <Forward5 />
+        </SmallButton>
+        <SmallButton
+          onClick={() => {
+            broadcastSkip();
+            setCurrentYoutubeId(queueList[0].youtubeId);
+            setQueueList(queueList.filter((yid, i) => i !== 0));
+          }}
+        >
+          <SkipNext />
+        </SmallButton>
       </ButtonRow>
-            <ButtonGroup>
-        <StyledControlButton onClick={sendMessage}>Send Message</StyledControlButton>
+      <ButtonGroup>
+        <StyledControlButton onClick={sendMessage}>
+          Send Message
+        </StyledControlButton>
         <StyledControlButton onClick={sendPing}>Ping</StyledControlButton>
-        <StyledControlButton onClick={() => {
-          const timestamp = playerRef.current.getCurrentTime();
-          broadcastSync(timestamp);
-        }}>
+        <StyledControlButton
+          onClick={() => {
+            const timestamp = playerRef.current.getCurrentTime();
+            broadcastSync(timestamp);
+          }}
+        >
           Sync
+        </StyledControlButton>
+        <StyledControlButton onClick={requestSync}>
+          Request Sync
         </StyledControlButton>
       </ButtonGroup>
 
       <div>
-<InputGroup>
-  <StyledInput
-    type="text"
-    placeholder="Enter YouTube ID"
-    value={youtubeId}
-    onChange={(e) => setYoutubeId(e.target.value)}
-  />
-  <StyledControlButton
-    onClick={() => {
-      broadcastAdd(youtubeId);
-      setQueueList((prev) => [...prev, { youtubeId, title: "Unknown Title" }]);
-    }}
-  >
-    Add
-  </StyledControlButton>
-  <StyledControlButton
-    onClick={() => {
-      const coolList = [
-        { youtubeId: "T3eEZ-_2m9w", title: "Song A" },
-        { youtubeId: "4z7oi-QxE8s", title: "Song B" },
-      ];
-      for (let i = 0; i < coolList.length; i++) {
-        broadcastAdd(coolList[i]);
-      }
-      setQueueList(coolList);
-    }}
-  >
-    Load it up 🎵
-  </StyledControlButton>
-</InputGroup>
-
+        <InputGroup>
+          <StyledInput
+            type="text"
+            placeholder="Enter YouTube ID"
+            value={youtubeId}
+            onChange={(e) => setYoutubeId(e.target.value)}
+          />
+          <StyledControlButton
+            onClick={async () => {
+              const title = await fetchVideoTitle(youtubeId);
+              if (title) {
+                broadcastAdd(youtubeId, title);
+                setQueueList((prev) => [...prev, { youtubeId, title }]);
+              } else {
+                alert("Video not found");
+              }
+            }}
+          >
+            Add
+          </StyledControlButton>
+          <StyledControlButton
+            onClick={async () => {
+              const coolList = [
+                "T3eEZ-_2m9w",
+                "4z7oi-QxE8s",
+                "0KlnDwNqIp8",
+                "v1CP04sTG0A",
+              ];
+              for (let i = 0; i < coolList.length; i++) {
+                const video = {
+                  youtubeId: coolList[i],
+                  title: await fetchVideoTitle(coolList[i]),
+                };
+                broadcastAdd(video.youtubeId, video.title);
+                setQueueList((prev) => [...prev, video]);
+              }
+            }}
+          >
+            Load it up 🎵
+          </StyledControlButton>
+        </InputGroup>
       </div>
-
     </>
   );
 }

@@ -1,6 +1,6 @@
 const isDev = window.location.hostname === "localhost";
 export const backendEndpoint = isDev
-  ? "https://sootation.synology.me:8001"
+  ? "http://localhost:5000"
   : "https://sootation.synology.me:8001";
 //"https://livetune-testing.onrender.com"
 
@@ -89,4 +89,11 @@ export async function fetchUserInfo(uid) {
   const apiEntry = `/api/user/info?id=${uid}`;
   const data = await actionGET(apiEntry);
   return data;
+}
+
+export async function fetchVideoTitle(yid) {
+  const apiEntry = `/api/video/title?youtubeid=${yid}`;
+  const data = await actionGET(apiEntry);
+  const title = data?.title;
+  return title;
 }
