@@ -90,3 +90,10 @@ export async function fetchUserInfo(uid) {
   const data = await actionGET(apiEntry);
   return data;
 }
+
+export async function fetchVideoTitle(yid) {
+  const apiEntry = `/api/video/title?youtubeid=${yid}`;
+  const data = await actionGET(apiEntry);
+  const title = data?.title;
+  return title;
+}
