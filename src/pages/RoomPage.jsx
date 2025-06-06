@@ -16,6 +16,15 @@ function RoomPage() {
 
   const [currentUsers, setCurrentUsers] = useState([uid]);
   const [currentUsersNameDisplay, setCurrentUsersNameDisplay] = useState([]);
+  //const [queueList, setQueueList] = useState([]);
+  //DUMMY QUEUE
+
+const [queueList, setQueueList] = useState([
+  { youtubeId: "YkgKThdzX-8", title: "Imagine" },
+  { youtubeId: "Zi_XLOBDo_Y", title: "Billie Jean" },
+  { youtubeId: "hTWKbfoikeg", title: "Smells Like Teen Spirit" },
+]);
+
 
   useEffect(() => {
     setCurrentUsersNameDisplay(
@@ -56,10 +65,27 @@ function RoomPage() {
         </TitleDiv>
       </TopBar>
       <PanelWrapper>
-        <QueuePanel>Queue</QueuePanel>
+        <QueuePanel>
+        <QueueHeader>Queue</QueueHeader>
+{queueList.map((song, i) => (
+  <QueueItem key={song.youtubeId}>
+    <span role="img" aria-label="music">🎵</span> {song.title}
+  </QueueItem>
+))}
+
+
+
+      </QueuePanel>
+
         <PlayPanel>
           Currently Playing
-          <YoutubePanel setCurrentUsers={setCurrentUsers} id={id} />
+          <YoutubePanel
+            setCurrentUsers={setCurrentUsers}
+            id={id}
+            queueList={queueList}
+            setQueueList={setQueueList}
+          />
+
         </PlayPanel>
         <UserPanel>
           Current Users
@@ -71,13 +97,44 @@ function RoomPage() {
     </PageWrapper>
   );
 }
+const QueueHeader = styled.h3`
+  font-size: 20px;
+  padding: 20px;
+  margin: 0;
+  border-bottom: 1px solid #333;
+  text-align: center;
+`;
+
+const QueueList = styled.div`
+  padding: 10px 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const QueueItem = styled.div`
+  padding: 10px 0;
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
 
 const BigButton = styled.button`
   background-color: transparent;
   border: none;
   color: white;
+  cursor: pointer;
+
   svg {
     font-size: 50px;
+  }
+
+  &:hover {
+    opacity: 0.8;
   }
 `;
 
@@ -85,13 +142,19 @@ const SmallButton = styled.button`
   background-color: transparent;
   border: none;
   color: white;
+  cursor: pointer;
+
   svg {
     font-size: 40px;
+  }
+
+  &:hover {
+    opacity: 0.8;
   }
 `;
 
 const TitleDiv = styled.div`
-  font-size: 30px;
+  font-size: 28px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -102,6 +165,7 @@ const PageWrapper = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: black;
 `;
 
 const TopBar = styled.div`
@@ -111,7 +175,7 @@ const TopBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0px 20px 0px 20px;
+  padding: 0px 20px;
 `;
 
 const PanelWrapper = styled.div`
@@ -125,15 +189,37 @@ const QueuePanel = styled.div`
   background-color: #131313;
   color: white;
 `;
+
 const PlayPanel = styled.div`
   flex: 2;
   background-color: #222222;
   color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
+
 const UserPanel = styled.div`
   flex: 1;
   background-color: #131313;
   color: white;
+  padding: 20px;
+
+  h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    text-align: center;
+  }
+
+  p {
+    font-size: 15px;
+    padding: 10px 0;
+    border-bottom: 1px solid #2a2a2a;
+    text-align: center;
+  }
 `;
 
 export default RoomPage;

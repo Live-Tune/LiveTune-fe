@@ -12,7 +12,8 @@ import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
 
-function YoutubePanel({ setCurrentUsers, id }) {
+function YoutubePanel({ setCurrentUsers, id, queueList, setQueueList }) {
+
   const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
   const socketRef = useRef(null);
@@ -55,7 +56,6 @@ function YoutubePanel({ setCurrentUsers, id }) {
   }, [playState, isDragging]);
 
   const [currentYoutubeId, setCurrentYoutubeId] = useState("");
-  const [queueList, setQueueList] = useState([]);
   const [youtubeId, setYoutubeId] = useState("");
 
   useEffect(() => {
@@ -267,8 +267,8 @@ function YoutubePanel({ setCurrentUsers, id }) {
             modestbranding: 1,
             disablekb: 1,
             controls: 0,
-            showinfo: 0,
-            mute: 0,
+            //showinfo: 0,
+            //mute: 0,
           },
         }}
         onStateChange={(e) => {
@@ -318,6 +318,7 @@ function YoutubePanel({ setCurrentUsers, id }) {
           },
         }}
       />
+      <ButtonRow>
       <SmallButton
         onClick={() => {
           const timestamp = playerRef.current.getCurrentTime() - 5;
@@ -352,70 +353,145 @@ function YoutubePanel({ setCurrentUsers, id }) {
       >
         <SkipNext />
       </SmallButton>
-      <div>
-        <button
-          onClick={() => {
-            sendMessage();
-          }}
-        >
-          Send Message
-        </button>
-        <button
-          onClick={() => {
-            sendPing();
-          }}
-        >
-          Ping
-        </button>
-        <button
-          onClick={() => {
-            const timestamp = playerRef.current.getCurrentTime();
-            broadcastSync(timestamp);
-          }}
-        >
+
+      </ButtonRow>
+            <ButtonGroup>
+        <StyledControlButton onClick={sendMessage}>Send Message</StyledControlButton>
+        <StyledControlButton onClick={sendPing}>Ping</StyledControlButton>
+        <StyledControlButton onClick={() => {
+          const timestamp = playerRef.current.getCurrentTime();
+          broadcastSync(timestamp);
+        }}>
           Sync
-        </button>
-      </div>
+        </StyledControlButton>
+      </ButtonGroup>
+
       <div>
-        <input
-          type="text"
-          placeholder="Youtube ID"
-          onChange={(e) => setYoutubeId(e.target.value)}
-          value={youtubeId}
-        />
-        <button
-          onClick={() => {
-            broadcastAdd(youtubeId);
-            setQueueList((prev) => [...prev, youtubeId]);
-          }}
-        >
-          Add
-        </button>
-        <button
-          onClick={() => {
-            const coolList = [
-              "T3eEZ-_2m9w",
-              "4z7oi-QxE8s",
-              "0KlnDwNqIp8",
-              "v1CP04sTG0A",
-            ];
-            for (let i = 0; i < coolList.length; i++) {
-              broadcastAdd(coolList[i]);
-            }
-            setQueueList(coolList);
-          }}
-        >
-          Load it up with good soongs
-        </button>
+<InputGroup>
+  <StyledInput
+    type="text"
+    placeholder="Enter YouTube ID"
+    value={youtubeId}
+    onChange={(e) => setYoutubeId(e.target.value)}
+  />
+  <StyledControlButton
+    onClick={() => {
+      broadcastAdd(youtubeId);
+      setQueueList((prev) => [...prev, { youtubeId, title: "Unknown Title" }]);
+    }}
+  >
+    Add
+  </StyledControlButton>
+  <StyledControlButton
+    onClick={() => {
+      const coolList = [
+        { youtubeId: "T3eEZ-_2m9w", title: "Song A" },
+        { youtubeId: "4z7oi-QxE8s", title: "Song B" },
+      ];
+      for (let i = 0; i < coolList.length; i++) {
+        broadcastAdd(coolList[i]);
+      }
+      setQueueList(coolList);
+    }}
+  >
+    Load it up 🎵
+  </StyledControlButton>
+</InputGroup>
+
       </div>
-      <div>
-        {queueList.map((yid) => {
-          return <p key={yid}>{yid}</p>;
-        })}
-      </div>
+
     </>
   );
 }
+const InputGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+`;
+
+const StyledInput = styled.input`
+  padding: 8px 12px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background-color: #222;
+  color: white;
+  font-size: 14px;
+  width: 200px;
+
+  &::placeholder {
+    color: #aaa;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  justify-content: center;
+`;
+
+const StyledControlButton = styled.button`
+  padding: 6px 14px;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #666;
+  }
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+`;
+
+const ControlGroup = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+`;
+
+const ControlButton = styled.button`
+  background-color: #ffffff10;
+  color: white;
+  border: 1px solid #555;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #ffffff20;
+    transform: scale(1.05);
+  }
+`;
+
+const ControlInput = styled.input`
+  background-color: #1f1f1f;
+  color: white;
+  border: 1px solid #555;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 200px;
+
+  &::placeholder {
+    color: #aaa;
+  }
+`;
 
 const BigButton = styled.button`
   background-color: transparent;
