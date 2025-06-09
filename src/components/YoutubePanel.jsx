@@ -4,6 +4,7 @@ import styled from "styled-components";
 import {
   backendEndpoint,
   fetchRoomInfo,
+  fetchUserInfo,
   fetchVideoTitle,
 } from "../apis/backendApis";
 import { io } from "socket.io-client";
@@ -149,6 +150,19 @@ function YoutubePanel({
     socket.on("user_left", async (data) => {
       console.log(`${data.uid} left the room`);
       setCurrentUsers((prev) => prev.filter((uid) => uid !== data.uid));
+    });
+
+    socket.on("host_changed", async (data) => {
+      console.log("host changed", data.new_host_uid);
+      if (data.new_host_uid == uid) {
+        alert(`Host left the room, you are the host now`);
+      } else {
+        alert(
+          `Host left the room, new host: ${
+            (await fetchUserInfo(data.new_host_uid)).username
+          }`
+        );
+      }
     });
 
     socketRef.current = socket;
