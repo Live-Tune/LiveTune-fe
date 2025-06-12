@@ -410,7 +410,7 @@ function YoutubePanel({
 
 
 <div>
-  {/* YouTube ID 입력 */}
+  {/* YouTube ID input */}
   <InputGroup>
     <StyledInput
       type="text"
@@ -434,7 +434,7 @@ function YoutubePanel({
   </InputGroup>
 
   <InputGroup>
-    {/* Playlist 입력 */}
+    {/* Playlist input */}
     <StyledInput
       type="text"
       placeholder="Enter YouTube Playlist URL"
@@ -445,7 +445,7 @@ function YoutubePanel({
       onClick={async () => {
         const videos = await fetchPlaylistVideos(playlistUrl);
         if (!videos.length) {
-          alert("플레이리스트를 불러오지 못했어요.");
+          alert("Failed to load the playlist.");
           return;
         }
 
@@ -463,14 +463,14 @@ function YoutubePanel({
           ...prev,
           ...videos.map((v) => ({ title: v.title, youtubeId: v.youtube_id })),
         ]);
-        alert("재생목록이 큐에 추가되었어요!");
+        alert("Playlist has been added to the queue!");
       }}
     >
       Add Playlist
     </StyledControlButton>
   </InputGroup>
 
-    {/* 프리셋 로딩 */}
+    {/* preset loding */}
   <InputGroup>
     <StyledControlButton
       onClick={async () => {
