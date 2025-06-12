@@ -97,3 +97,9 @@ export async function fetchVideoTitle(yid) {
   const title = data?.title;
   return title;
 }
+
+export async function fetchPlaylistVideos(playlistUrl) {
+  const apiEntry = "/api/playlist/fetch";
+  const data = await actionPOST(apiEntry, { url: playlistUrl });
+  return data?.videos || [];
+}

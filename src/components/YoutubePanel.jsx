@@ -6,6 +6,7 @@ import {
   fetchRoomInfo,
   fetchUserInfo,
   fetchVideoTitle,
+  fetchPlaylistVideos
 } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
@@ -16,6 +17,7 @@ import PlayCircleFilled from "@mui/icons-material/PlayCircleFilled";
 import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
+
 
 function YoutubePanel({
   setCurrentUsers,
@@ -67,6 +69,7 @@ function YoutubePanel({
   }, [playState, isDragging]);
 
   const [youtubeId, setYoutubeId] = useState("");
+  const [playlistUrl, setPlaylistUrl] = useState("");
   const syncBufferRef = useRef(null);
 
   useEffect(() => {
@@ -124,6 +127,17 @@ function YoutubePanel({
         return rest;
       });
     });
+    socket.on("broadcast_add_playlist", (data) => {
+      console.log("Broadcast playlist received");
+      setQueueList((prev) => [
+        ...prev,
+        ...data.videos.map((v) => ({
+          youtubeId: v.youtube_id,
+          title: v.title,
+        })),
+      ]);
+    });
+
 
     socket.on("pong", () => {
       pingDelayRef.current = Date.now() - pingTimeRef.current;
@@ -394,49 +408,92 @@ function YoutubePanel({
         </StyledControlButton>
       </ButtonGroup>
 
-      <div>
-        <InputGroup>
-          <StyledInput
-            type="text"
-            placeholder="Enter YouTube ID"
-            value={youtubeId}
-            onChange={(e) => setYoutubeId(e.target.value)}
-          />
-          <StyledControlButton
-            onClick={async () => {
-              const title = await fetchVideoTitle(youtubeId);
-              if (title) {
-                broadcastAdd(youtubeId, title);
-                setQueueList((prev) => [...prev, { youtubeId, title }]);
-              } else {
-                alert("Video not found");
-              }
-            }}
-          >
-            Add
-          </StyledControlButton>
-          <StyledControlButton
-            onClick={async () => {
-              const coolList = [
-                "T3eEZ-_2m9w",
-                "4z7oi-QxE8s",
-                "0KlnDwNqIp8",
-                "v1CP04sTG0A",
-              ];
-              for (let i = 0; i < coolList.length; i++) {
-                const video = {
-                  youtubeId: coolList[i],
-                  title: await fetchVideoTitle(coolList[i]),
-                };
-                broadcastAdd(video.youtubeId, video.title);
-                setQueueList((prev) => [...prev, video]);
-              }
-            }}
-          >
-            Load it up 🎵
-          </StyledControlButton>
-        </InputGroup>
-      </div>
+
+<div>
+  {/* YouTube ID 입력 */}
+  <InputGroup>
+    <StyledInput
+      type="text"
+      placeholder="Enter YouTube ID"
+      value={youtubeId}
+      onChange={(e) => setYoutubeId(e.target.value)}
+    />
+    <StyledControlButton
+      onClick={async () => {
+        const title = await fetchVideoTitle(youtubeId);
+        if (title) {
+          broadcastAdd(youtubeId, title);
+          setQueueList((prev) => [...prev, { youtubeId, title }]);
+        } else {
+          alert("Video not found");
+        }
+      }}
+    >
+      Add
+    </StyledControlButton>
+  </InputGroup>
+
+  <InputGroup>
+    {/* Playlist 입력 */}
+    <StyledInput
+      type="text"
+      placeholder="Enter YouTube Playlist URL"
+      value={playlistUrl}
+      onChange={(e) => setPlaylistUrl(e.target.value)}
+    />
+    <StyledControlButton
+      onClick={async () => {
+        const videos = await fetchPlaylistVideos(playlistUrl);
+        if (!videos.length) {
+          alert("플레이리스트를 불러오지 못했어요.");
+          return;
+        }
+
+        socketRef.current.emit("send_message", {
+          room_id: id,
+          message_type: "add_playlist",
+          videos: videos.map((v) => ({
+            title: v.title,
+            youtube_id: v.youtube_id,
+            added_by: uid,
+          })),
+        });
+
+        setQueueList((prev) => [
+          ...prev,
+          ...videos.map((v) => ({ title: v.title, youtubeId: v.youtube_id })),
+        ]);
+        alert("재생목록이 큐에 추가되었어요!");
+      }}
+    >
+      Add Playlist
+    </StyledControlButton>
+  </InputGroup>
+
+    {/* 프리셋 로딩 */}
+  <InputGroup>
+    <StyledControlButton
+      onClick={async () => {
+        const coolList = [
+          "T3eEZ-_2m9w",
+          "4z7oi-QxE8s",
+          "0KlnDwNqIp8",
+          "v1CP04sTG0A",
+        ];
+        for (let i = 0; i < coolList.length; i++) {
+          const video = {
+            youtubeId: coolList[i],
+            title: await fetchVideoTitle(coolList[i]),
+          };
+          broadcastAdd(video.youtubeId, video.title);
+          setQueueList((prev) => [...prev, video]);
+        }
+      }}
+    >
+      Load it up 🎵
+    </StyledControlButton>
+  </InputGroup>
+</div>
     </>
   );
 }
