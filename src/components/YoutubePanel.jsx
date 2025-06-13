@@ -6,7 +6,7 @@ import {
   fetchRoomInfo,
   fetchUserInfo,
   fetchVideoTitle,
-  fetchPlaylistVideos
+  fetchPlaylistById
 } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
@@ -56,7 +56,7 @@ function YoutubePanel({
     const secs = Math.floor(seconds % 60);
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
-
+  
   useEffect(() => {
     const interval = setInterval(() => {
       if (playerRef.current && isPlaying() && !isDragging) {
@@ -434,41 +434,40 @@ function YoutubePanel({
   </InputGroup>
 
   <InputGroup>
-    {/* Playlist input */}
-    <StyledInput
-      type="text"
-      placeholder="Enter YouTube Playlist URL"
-      value={playlistUrl}
-      onChange={(e) => setPlaylistUrl(e.target.value)}
-    />
-    <StyledControlButton
-      onClick={async () => {
-        const videos = await fetchPlaylistVideos(playlistUrl);
-        if (!videos.length) {
-          alert("Failed to load the playlist.");
-          return;
-        }
+  <StyledInput
+    type="text"
+    placeholder="Enter YouTube Playlist ID"
+    value={playlistUrl}
+    onChange={(e) => setPlaylistUrl(e.target.value)}
+  />
+  <StyledControlButton
+    onClick={async () => {
+      const videos = await fetchPlaylistById(playlistUrl); 
+      if (!videos.length) {
+        alert("Failed to load the playlist.");
+        return;
+      }
 
-        socketRef.current.emit("send_message", {
-          room_id: id,
-          message_type: "add_playlist",
-          videos: videos.map((v) => ({
-            title: v.title,
-            youtube_id: v.youtube_id,
-            added_by: uid,
-          })),
-        });
+      socketRef.current.emit("send_message", {
+        room_id: id,
+        message_type: "add_playlist",
+        videos: videos.map((v) => ({
+          title: v.title,
+          youtube_id: v.youtube_id,
+          added_by: uid,
+        })),
+      });
 
-        setQueueList((prev) => [
-          ...prev,
-          ...videos.map((v) => ({ title: v.title, youtubeId: v.youtube_id })),
-        ]);
-        alert("Playlist has been added to the queue!");
-      }}
-    >
-      Add Playlist
-    </StyledControlButton>
-  </InputGroup>
+      setQueueList((prev) => [
+        ...prev,
+        ...videos.map((v) => ({ title: v.title, youtubeId: v.youtube_id })),
+      ]);
+      alert("Playlist has been added to the queue!");
+    }}
+  >
+    Add Playlist by ID
+  </StyledControlButton>
+</InputGroup>
 
     {/* preset loding */}
   <InputGroup>

@@ -65,11 +65,8 @@ function RoomPage() {
         <QueuePanel>
           <QueueHeader>Queue</QueueHeader>
           {queueList.map((song, i) => (
-            <QueueItem key={song.youtubeId}>
-              <span role="img" aria-label="music">
-                🎵
-              </span>{" "}
-              {song.title}
+            <QueueItem key={`${song.youtubeId}-${i}`}>
+              <span role="img" aria-label="music">🎵</span> {song.title}
             </QueueItem>
           ))}
         </QueuePanel>

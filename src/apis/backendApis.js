@@ -98,8 +98,8 @@ export async function fetchVideoTitle(yid) {
   return title;
 }
 
-export async function fetchPlaylistVideos(playlistUrl) {
+export async function fetchPlaylistById(playlistId) {
   const apiEntry = "/api/playlist/fetch";
-  const data = await actionPOST(apiEntry, { url: playlistUrl });
+  const data = await actionPOST(apiEntry, { playlistId });
   return data?.videos || [];
 }
