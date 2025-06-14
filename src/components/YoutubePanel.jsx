@@ -464,7 +464,6 @@ function YoutubePanel({
                   youtubeId: v.youtube_id,
                 })),
               ]);
-              alert("Playlist has been added to the queue!");
             }}
           >
             Add Playlist by ID

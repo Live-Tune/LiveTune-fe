@@ -99,7 +99,7 @@ export async function fetchVideoTitle(yid) {
 }
 
 export async function fetchPlaylistById(playlistId) {
-  const apiEntry = "/api/playlist/fetch";
-  const data = await actionPOST(apiEntry, { playlistId });
+  const apiEntry = `/api/video/getplaylist?playlistid=${playlistId}`;
+  const data = await actionGET(apiEntry);
   return data?.videos || [];
 }
