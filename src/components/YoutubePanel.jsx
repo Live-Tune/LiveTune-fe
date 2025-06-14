@@ -71,6 +71,8 @@ function YoutubePanel({
   const [playlistUrl, setPlaylistUrl] = useState("");
   const syncBufferRef = useRef(null);
 
+  const [volume, setVolume] = useState(1);
+
   useEffect(() => {
     const socket = io(backendEndpoint, {
       path: "/socket.io",
@@ -492,6 +494,33 @@ function YoutubePanel({
           >
             Load it up 🎵
           </StyledControlButton>
+          <Slider
+            value={volume}
+            onChange={(e, newValue) => {
+              setVolume(newValue);
+              playerRef.current.setVolume(newValue);
+            }}
+            min={0}
+            max={100}
+            step={1}
+            valueLabelDisplay="auto"
+            sx={{
+              color: "white",
+              "& .MuiSlider-thumb": {
+                color: "white",
+              },
+              "& .MuiSlider-rail": {
+                color: "white",
+              },
+              "& .MuiSlider-track": {
+                color: "white",
+              },
+              "& .MuiSlider-valueLabel": {
+                color: "black",
+                backgroundColor: "white",
+              },
+            }}
+          />
         </InputGroup>
       </div>
     </>
