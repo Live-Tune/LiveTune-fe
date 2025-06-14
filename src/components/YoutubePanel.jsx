@@ -6,6 +6,7 @@ import {
   fetchRoomInfo,
   fetchUserInfo,
   fetchVideoTitle,
+  fetchPlaylistById,
 } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
@@ -67,6 +68,7 @@ function YoutubePanel({
   }, [playState, isDragging]);
 
   const [youtubeId, setYoutubeId] = useState("");
+  const [playlistUrl, setPlaylistUrl] = useState("");
   const syncBufferRef = useRef(null);
 
   useEffect(() => {
@@ -123,6 +125,16 @@ function YoutubePanel({
         setCurrentYoutubeId(nextVideoId.youtubeId);
         return rest;
       });
+    });
+    socket.on("broadcast_add_playlist", (data) => {
+      console.log("Broadcast playlist received");
+      setQueueList((prev) => [
+        ...prev,
+        ...data.videos.map((v) => ({
+          youtubeId: v.youtubeId,
+          title: v.title,
+        })),
+      ]);
     });
 
     socket.on("pong", () => {
@@ -245,6 +257,18 @@ function YoutubePanel({
     socketRef.current.emit("send_message", {
       room_id: id,
       message_type: "req_sync",
+    });
+  };
+
+  const broadcastAddPlaylist = (videos) => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "add_playlist",
+      videos: videos.map((v) => ({
+        title: v.title,
+        youtubeId: v.youtube_id,
+        added_by: uid,
+      })),
     });
   };
 
@@ -395,6 +419,7 @@ function YoutubePanel({
       </ButtonGroup>
 
       <div>
+        {/* YouTube ID input */}
         <InputGroup>
           <StyledInput
             type="text"
@@ -415,6 +440,38 @@ function YoutubePanel({
           >
             Add
           </StyledControlButton>
+        </InputGroup>
+
+        <InputGroup>
+          <StyledInput
+            type="text"
+            placeholder="Enter YouTube Playlist ID"
+            value={playlistUrl}
+            onChange={(e) => setPlaylistUrl(e.target.value)}
+          />
+          <StyledControlButton
+            onClick={async () => {
+              const videos = await fetchPlaylistById(playlistUrl);
+              if (!videos.length) {
+                alert("Failed to load the playlist.");
+                return;
+              }
+              broadcastAddPlaylist(videos);
+              setQueueList((prev) => [
+                ...prev,
+                ...videos.map((v) => ({
+                  title: v.title,
+                  youtubeId: v.youtube_id,
+                })),
+              ]);
+            }}
+          >
+            Add Playlist by ID
+          </StyledControlButton>
+        </InputGroup>
+
+        {/* preset loding */}
+        <InputGroup>
           <StyledControlButton
             onClick={async () => {
               const coolList = [
