@@ -1,4 +1,6 @@
-const isDev = window.location.hostname === "localhost";
+const isDev =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 export const backendEndpoint = isDev
   ? "http://localhost:5000"
   : "https://sootation.synology.me:8001";

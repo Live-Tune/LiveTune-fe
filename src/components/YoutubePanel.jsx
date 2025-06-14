@@ -25,6 +25,7 @@ function YoutubePanel({
   setQueueList,
   currentYoutubeId,
   setCurrentYoutubeId,
+  roomInfo,
 }) {
   const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
@@ -70,6 +71,8 @@ function YoutubePanel({
   const [youtubeId, setYoutubeId] = useState("");
   const [playlistUrl, setPlaylistUrl] = useState("");
   const syncBufferRef = useRef(null);
+
+  const [volume, setVolume] = useState(100);
 
   useEffect(() => {
     const socket = io(backendEndpoint, {
@@ -302,6 +305,7 @@ function YoutubePanel({
           setDuration(await e.target.getDuration());
           playerRef.current.playVideo();
           playerRef.current.pauseVideo();
+          playerRef.current.setVolume(volume);
           console.log("Ready to play");
         }}
         opts={{
@@ -319,6 +323,23 @@ function YoutubePanel({
         }}
         onStateChange={(e) => {
           setPlayState(e.data);
+        }}
+        onEnd={() => {
+          if (roomInfo.host === uid) {
+            setTimeout(() => {
+              broadcastSkip();
+              setCurrentYoutubeId(queueList[0].youtubeId);
+              setQueueList(queueList.filter((yid, i) => i !== 0));
+              setTimeout(() => {
+                broadcastPlay();
+                playerRef.current.playVideo();
+                setTimeout(() => {
+                  const timestamp = playerRef.current.getCurrentTime();
+                  broadcastSync(timestamp);
+                }, 3000);
+              }, 3000);
+            }, 3000);
+          }
         }}
       />
       <div
@@ -400,6 +421,44 @@ function YoutubePanel({
           <SkipNext />
         </SmallButton>
       </ButtonRow>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+        }}
+      >
+        <p>Volume</p>
+        <Slider
+          value={volume}
+          onChange={(e, newValue) => {
+            setVolume(newValue);
+            playerRef.current.setVolume(newValue);
+          }}
+          min={0}
+          max={100}
+          step={1}
+          valueLabelDisplay="auto"
+          sx={{
+            color: "white",
+            "& .MuiSlider-thumb": {
+              color: "white",
+            },
+            "& .MuiSlider-rail": {
+              color: "white",
+            },
+            "& .MuiSlider-track": {
+              color: "white",
+            },
+            "& .MuiSlider-valueLabel": {
+              color: "black",
+              backgroundColor: "white",
+            },
+          }}
+        />
+      </div>
       <ButtonGroup>
         <StyledControlButton onClick={sendMessage}>
           Send Message
