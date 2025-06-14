@@ -6,7 +6,7 @@ import {
   fetchRoomInfo,
   fetchUserInfo,
   fetchVideoTitle,
-  fetchPlaylistById
+  fetchPlaylistById,
 } from "../apis/backendApis";
 import { io } from "socket.io-client";
 import { UserContext } from "../contexts/UserContext";
@@ -17,7 +17,6 @@ import PlayCircleFilled from "@mui/icons-material/PlayCircleFilled";
 import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
-
 
 function YoutubePanel({
   setCurrentUsers,
@@ -56,7 +55,7 @@ function YoutubePanel({
     const secs = Math.floor(seconds % 60);
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (playerRef.current && isPlaying() && !isDragging) {
@@ -132,12 +131,11 @@ function YoutubePanel({
       setQueueList((prev) => [
         ...prev,
         ...data.videos.map((v) => ({
-          youtubeId: v.youtube_id,
+          youtubeId: v.youtubeId,
           title: v.title,
         })),
       ]);
     });
-
 
     socket.on("pong", () => {
       pingDelayRef.current = Date.now() - pingTimeRef.current;
@@ -259,6 +257,18 @@ function YoutubePanel({
     socketRef.current.emit("send_message", {
       room_id: id,
       message_type: "req_sync",
+    });
+  };
+
+  const broadcastAddPlaylist = (videos) => {
+    socketRef.current.emit("send_message", {
+      room_id: id,
+      message_type: "add_playlist",
+      videos: videos.map((v) => ({
+        title: v.title,
+        youtubeId: v.youtube_id,
+        added_by: uid,
+      })),
     });
   };
 
@@ -408,91 +418,83 @@ function YoutubePanel({
         </StyledControlButton>
       </ButtonGroup>
 
+      <div>
+        {/* YouTube ID input */}
+        <InputGroup>
+          <StyledInput
+            type="text"
+            placeholder="Enter YouTube ID"
+            value={youtubeId}
+            onChange={(e) => setYoutubeId(e.target.value)}
+          />
+          <StyledControlButton
+            onClick={async () => {
+              const title = await fetchVideoTitle(youtubeId);
+              if (title) {
+                broadcastAdd(youtubeId, title);
+                setQueueList((prev) => [...prev, { youtubeId, title }]);
+              } else {
+                alert("Video not found");
+              }
+            }}
+          >
+            Add
+          </StyledControlButton>
+        </InputGroup>
 
-<div>
-  {/* YouTube ID input */}
-  <InputGroup>
-    <StyledInput
-      type="text"
-      placeholder="Enter YouTube ID"
-      value={youtubeId}
-      onChange={(e) => setYoutubeId(e.target.value)}
-    />
-    <StyledControlButton
-      onClick={async () => {
-        const title = await fetchVideoTitle(youtubeId);
-        if (title) {
-          broadcastAdd(youtubeId, title);
-          setQueueList((prev) => [...prev, { youtubeId, title }]);
-        } else {
-          alert("Video not found");
-        }
-      }}
-    >
-      Add
-    </StyledControlButton>
-  </InputGroup>
+        <InputGroup>
+          <StyledInput
+            type="text"
+            placeholder="Enter YouTube Playlist ID"
+            value={playlistUrl}
+            onChange={(e) => setPlaylistUrl(e.target.value)}
+          />
+          <StyledControlButton
+            onClick={async () => {
+              const videos = await fetchPlaylistById(playlistUrl);
+              if (!videos.length) {
+                alert("Failed to load the playlist.");
+                return;
+              }
+              broadcastAddPlaylist(videos);
+              setQueueList((prev) => [
+                ...prev,
+                ...videos.map((v) => ({
+                  title: v.title,
+                  youtubeId: v.youtube_id,
+                })),
+              ]);
+              alert("Playlist has been added to the queue!");
+            }}
+          >
+            Add Playlist by ID
+          </StyledControlButton>
+        </InputGroup>
 
-  <InputGroup>
-  <StyledInput
-    type="text"
-    placeholder="Enter YouTube Playlist ID"
-    value={playlistUrl}
-    onChange={(e) => setPlaylistUrl(e.target.value)}
-  />
-  <StyledControlButton
-    onClick={async () => {
-      const videos = await fetchPlaylistById(playlistUrl); 
-      if (!videos.length) {
-        alert("Failed to load the playlist.");
-        return;
-      }
-
-      socketRef.current.emit("send_message", {
-        room_id: id,
-        message_type: "add_playlist",
-        videos: videos.map((v) => ({
-          title: v.title,
-          youtube_id: v.youtube_id,
-          added_by: uid,
-        })),
-      });
-
-      setQueueList((prev) => [
-        ...prev,
-        ...videos.map((v) => ({ title: v.title, youtubeId: v.youtube_id })),
-      ]);
-      alert("Playlist has been added to the queue!");
-    }}
-  >
-    Add Playlist by ID
-  </StyledControlButton>
-</InputGroup>
-
-    {/* preset loding */}
-  <InputGroup>
-    <StyledControlButton
-      onClick={async () => {
-        const coolList = [
-          "T3eEZ-_2m9w",
-          "4z7oi-QxE8s",
-          "0KlnDwNqIp8",
-          "v1CP04sTG0A",
-        ];
-        for (let i = 0; i < coolList.length; i++) {
-          const video = {
-            youtubeId: coolList[i],
-            title: await fetchVideoTitle(coolList[i]),
-          };
-          broadcastAdd(video.youtubeId, video.title);
-          setQueueList((prev) => [...prev, video]);
-        }
-      }}
-    >
-      Load it up 🎵
-    </StyledControlButton>
-  </InputGroup>
-</div>
+        {/* preset loding */}
+        <InputGroup>
+          <StyledControlButton
+            onClick={async () => {
+              const coolList = [
+                "T3eEZ-_2m9w",
+                "4z7oi-QxE8s",
+                "0KlnDwNqIp8",
+                "v1CP04sTG0A",
+              ];
+              for (let i = 0; i < coolList.length; i++) {
+                const video = {
+                  youtubeId: coolList[i],
+                  title: await fetchVideoTitle(coolList[i]),
+                };
+                broadcastAdd(video.youtubeId, video.title);
+                setQueueList((prev) => [...prev, video]);
+              }
+            }}
+          >
+            Load it up 🎵
+          </StyledControlButton>
+        </InputGroup>
+      </div>
     </>
   );
 }
