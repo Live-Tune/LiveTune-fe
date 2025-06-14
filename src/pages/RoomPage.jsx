@@ -88,6 +88,7 @@ function RoomPage() {
             setQueueList={setQueueList}
             currentYoutubeId={currentYoutubeId}
             setCurrentYoutubeId={setCurrentYoutubeId}
+            roomInfo={roomInfo}
           />
         </PlayPanel>
         <UserPanel>

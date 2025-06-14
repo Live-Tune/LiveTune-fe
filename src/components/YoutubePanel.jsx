@@ -25,6 +25,7 @@ function YoutubePanel({
   setQueueList,
   currentYoutubeId,
   setCurrentYoutubeId,
+  roomInfo,
 }) {
   const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
@@ -324,19 +325,21 @@ function YoutubePanel({
           setPlayState(e.data);
         }}
         onEnd={() => {
-          setTimeout(() => {
-            broadcastSkip();
-            setCurrentYoutubeId(queueList[0].youtubeId);
-            setQueueList(queueList.filter((yid, i) => i !== 0));
+          if (roomInfo.host === uid) {
             setTimeout(() => {
-              broadcastPlay();
-              playerRef.current.playVideo();
+              broadcastSkip();
+              setCurrentYoutubeId(queueList[0].youtubeId);
+              setQueueList(queueList.filter((yid, i) => i !== 0));
               setTimeout(() => {
-                const timestamp = playerRef.current.getCurrentTime();
-                broadcastSync(timestamp);
+                broadcastPlay();
+                playerRef.current.playVideo();
+                setTimeout(() => {
+                  const timestamp = playerRef.current.getCurrentTime();
+                  broadcastSync(timestamp);
+                }, 3000);
               }, 3000);
             }, 3000);
-          }, 3000);
+          }
         }}
       />
       <div
