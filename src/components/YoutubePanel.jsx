@@ -304,6 +304,7 @@ function YoutubePanel({
           setDuration(await e.target.getDuration());
           playerRef.current.playVideo();
           playerRef.current.pauseVideo();
+          playerRef.current.setVolume(volume);
           console.log("Ready to play");
         }}
         opts={{
@@ -402,6 +403,44 @@ function YoutubePanel({
           <SkipNext />
         </SmallButton>
       </ButtonRow>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+        }}
+      >
+        <p>Volume</p>
+        <Slider
+          value={volume}
+          onChange={(e, newValue) => {
+            setVolume(newValue);
+            playerRef.current.setVolume(newValue);
+          }}
+          min={0}
+          max={100}
+          step={1}
+          valueLabelDisplay="auto"
+          sx={{
+            color: "white",
+            "& .MuiSlider-thumb": {
+              color: "white",
+            },
+            "& .MuiSlider-rail": {
+              color: "white",
+            },
+            "& .MuiSlider-track": {
+              color: "white",
+            },
+            "& .MuiSlider-valueLabel": {
+              color: "black",
+              backgroundColor: "white",
+            },
+          }}
+        />
+      </div>
       <ButtonGroup>
         <StyledControlButton onClick={sendMessage}>
           Send Message
@@ -494,33 +533,6 @@ function YoutubePanel({
           >
             Load it up 🎵
           </StyledControlButton>
-          <Slider
-            value={volume}
-            onChange={(e, newValue) => {
-              setVolume(newValue);
-              playerRef.current.setVolume(newValue);
-            }}
-            min={0}
-            max={100}
-            step={1}
-            valueLabelDisplay="auto"
-            sx={{
-              color: "white",
-              "& .MuiSlider-thumb": {
-                color: "white",
-              },
-              "& .MuiSlider-rail": {
-                color: "white",
-              },
-              "& .MuiSlider-track": {
-                color: "white",
-              },
-              "& .MuiSlider-valueLabel": {
-                color: "black",
-                backgroundColor: "white",
-              },
-            }}
-          />
         </InputGroup>
       </div>
     </>

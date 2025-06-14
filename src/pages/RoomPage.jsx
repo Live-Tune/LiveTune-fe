@@ -29,7 +29,6 @@ function RoomPage() {
     const update = async () => {
       const roomInfo = await fetchRoomInfo(id);
       setRoomInfo(roomInfo);
-      setCurrentUsers(roomInfo.current_users);
     };
     update();
   }, [currentUsers]);
