@@ -71,7 +71,7 @@ function YoutubePanel({
   const [playlistUrl, setPlaylistUrl] = useState("");
   const syncBufferRef = useRef(null);
 
-  const [volume, setVolume] = useState(1);
+  const [volume, setVolume] = useState(100);
 
   useEffect(() => {
     const socket = io(backendEndpoint, {
