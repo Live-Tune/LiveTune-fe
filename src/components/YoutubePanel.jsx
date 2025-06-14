@@ -323,6 +323,21 @@ function YoutubePanel({
         onStateChange={(e) => {
           setPlayState(e.data);
         }}
+        onEnd={() => {
+          setTimeout(() => {
+            broadcastSkip();
+            setCurrentYoutubeId(queueList[0].youtubeId);
+            setQueueList(queueList.filter((yid, i) => i !== 0));
+            setTimeout(() => {
+              broadcastPlay();
+              playerRef.current.playVideo();
+              setTimeout(() => {
+                const timestamp = playerRef.current.getCurrentTime();
+                broadcastSync(timestamp);
+              }, 3000);
+            }, 3000);
+          }, 3000);
+        }}
       />
       <div
         style={{
