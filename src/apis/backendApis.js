@@ -2,7 +2,7 @@ const isDev =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
 export const backendEndpoint = isDev
-  ? "https://sootation.synology.me:8001"
+  ? "http://localhost:5000"
   : "https://sootation.synology.me:8001";
 //"https://livetune-testing.onrender.com"
 
