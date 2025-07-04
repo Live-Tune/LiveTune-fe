@@ -26,6 +26,11 @@ function RoomPage() {
         return userInfo.username;
       })
     );
+    const update = async () => {
+      const roomInfo = await fetchRoomInfo(id);
+      setRoomInfo(roomInfo);
+    };
+    update();
   }, [currentUsers]);
 
   useEffect(() => {
@@ -66,7 +71,10 @@ function RoomPage() {
           <QueueHeader>Queue</QueueHeader>
           {queueList.map((song, i) => (
             <QueueItem key={`${song.youtubeId}-${i}`}>
-              <span role="img" aria-label="music">🎵</span> {song.title}
+              <span role="img" aria-label="music">
+                🎵
+              </span>{" "}
+              {song.title}
             </QueueItem>
           ))}
         </QueuePanel>
@@ -80,12 +88,17 @@ function RoomPage() {
             setQueueList={setQueueList}
             currentYoutubeId={currentYoutubeId}
             setCurrentYoutubeId={setCurrentYoutubeId}
+            roomInfo={roomInfo}
           />
         </PlayPanel>
         <UserPanel>
           Current Users
           {currentUsersNameDisplay.map((name, i) => {
-            return <p key={i}>{name}</p>;
+            return (
+              <p key={i}>
+                {name} {currentUsers[i] === roomInfo?.host ? "👑" : ""}
+              </p>
+            );
           })}
         </UserPanel>
       </PanelWrapper>

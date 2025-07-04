@@ -17,6 +17,10 @@ import PlayCircleFilled from "@mui/icons-material/PlayCircleFilled";
 import PauseCircleFilled from "@mui/icons-material/PauseCircleFilled";
 import SkipNext from "@mui/icons-material/SkipNext";
 import Slider from "@mui/material/Slider";
+import {
+  getPlaylistId,
+  getYouTubeVideoId,
+} from "../utils/youtubeURLParamHandler";
 
 function YoutubePanel({
   setCurrentUsers,
@@ -25,6 +29,7 @@ function YoutubePanel({
   setQueueList,
   currentYoutubeId,
   setCurrentYoutubeId,
+  roomInfo,
 }) {
   const { userName, uid } = useContext(UserContext);
   const playerRef = useRef(null);
@@ -67,9 +72,11 @@ function YoutubePanel({
     return () => clearInterval(interval);
   }, [playState, isDragging]);
 
-  const [youtubeId, setYoutubeId] = useState("");
-  const [playlistUrl, setPlaylistUrl] = useState("");
+  const [youtubeURL, setYoutubeURL] = useState("");
+  const [playlistURL, setPlaylistURL] = useState("");
   const syncBufferRef = useRef(null);
+
+  const [volume, setVolume] = useState(100);
 
   useEffect(() => {
     const socket = io(backendEndpoint, {
@@ -302,6 +309,7 @@ function YoutubePanel({
           setDuration(await e.target.getDuration());
           playerRef.current.playVideo();
           playerRef.current.pauseVideo();
+          playerRef.current.setVolume(volume);
           console.log("Ready to play");
         }}
         opts={{
@@ -319,6 +327,23 @@ function YoutubePanel({
         }}
         onStateChange={(e) => {
           setPlayState(e.data);
+        }}
+        onEnd={() => {
+          if (roomInfo.host === uid) {
+            setTimeout(() => {
+              broadcastSkip();
+              setCurrentYoutubeId(queueList[0].youtubeId);
+              setQueueList(queueList.filter((yid, i) => i !== 0));
+              setTimeout(() => {
+                broadcastPlay();
+                playerRef.current.playVideo();
+                setTimeout(() => {
+                  const timestamp = playerRef.current.getCurrentTime();
+                  broadcastSync(timestamp);
+                }, 3000);
+              }, 3000);
+            }, 3000);
+          }
         }}
       />
       <div
@@ -400,6 +425,44 @@ function YoutubePanel({
           <SkipNext />
         </SmallButton>
       </ButtonRow>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "20px",
+        }}
+      >
+        <p>Volume</p>
+        <Slider
+          value={volume}
+          onChange={(e, newValue) => {
+            setVolume(newValue);
+            playerRef.current.setVolume(newValue);
+          }}
+          min={0}
+          max={100}
+          step={1}
+          valueLabelDisplay="auto"
+          sx={{
+            color: "white",
+            "& .MuiSlider-thumb": {
+              color: "white",
+            },
+            "& .MuiSlider-rail": {
+              color: "white",
+            },
+            "& .MuiSlider-track": {
+              color: "white",
+            },
+            "& .MuiSlider-valueLabel": {
+              color: "black",
+              backgroundColor: "white",
+            },
+          }}
+        />
+      </div>
       <ButtonGroup>
         <StyledControlButton onClick={sendMessage}>
           Send Message
@@ -423,12 +486,18 @@ function YoutubePanel({
         <InputGroup>
           <StyledInput
             type="text"
-            placeholder="Enter YouTube ID"
-            value={youtubeId}
-            onChange={(e) => setYoutubeId(e.target.value)}
+            placeholder="Enter YouTube Video URL"
+            value={youtubeURL}
+            onChange={(e) => setYoutubeURL(e.target.value)}
           />
           <StyledControlButton
             onClick={async () => {
+              const youtubeId = getYouTubeVideoId(youtubeURL);
+              if (!youtubeId) {
+                alert("Invalid YouTube URL");
+                setYoutubeURL("");
+                return;
+              }
               const title = await fetchVideoTitle(youtubeId);
               if (title) {
                 broadcastAdd(youtubeId, title);
@@ -436,24 +505,27 @@ function YoutubePanel({
               } else {
                 alert("Video not found");
               }
+              setYoutubeURL("");
             }}
           >
-            Add
+            Add Video
           </StyledControlButton>
         </InputGroup>
 
         <InputGroup>
           <StyledInput
             type="text"
-            placeholder="Enter YouTube Playlist ID"
-            value={playlistUrl}
-            onChange={(e) => setPlaylistUrl(e.target.value)}
+            placeholder="Enter YouTube Playlist URL"
+            value={playlistURL}
+            onChange={(e) => setPlaylistURL(e.target.value)}
           />
           <StyledControlButton
             onClick={async () => {
-              const videos = await fetchPlaylistById(playlistUrl);
+              const playlistId = getPlaylistId(playlistURL);
+              const videos = await fetchPlaylistById(playlistId);
               if (!videos.length) {
                 alert("Failed to load the playlist.");
+                setPlaylistURL("");
                 return;
               }
               broadcastAddPlaylist(videos);
@@ -464,9 +536,10 @@ function YoutubePanel({
                   youtubeId: v.youtube_id,
                 })),
               ]);
+              setPlaylistURL("");
             }}
           >
-            Add Playlist by ID
+            Add Playlist
           </StyledControlButton>
         </InputGroup>
 
